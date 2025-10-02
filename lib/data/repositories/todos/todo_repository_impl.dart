@@ -1,38 +1,56 @@
 import 'dart:async';
-import 'dart:convert';
+import 'package:login_todo/core/injection.dart';
 import 'package:login_todo/models/todos/todo_model.dart';
-import '../../../domain/repositories/todos/todo_repository.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:login_todo/domain/repositories/todos/todo_repository.dart';
+import 'package:login_todo/data/service/todos/todo_service.dart';
 
 class TodoRepositoryImpl implements TodoRepository {
-  static const _kTodosKey = 'todos_list_v1';
-  final SharedPreferences _prefs;
-  final _controller = StreamController<List<TodoModel>>.broadcast();
+  //final TodoService _service;
+  final _service = getIt<TodoService>();
 
-  TodoRepositoryImpl(this._prefs);
+  TodoRepositoryImpl();
 
   @override
   Future<List<TodoModel>> loadTodos() async {
-    final raw = _prefs.getString(_kTodosKey);
-    if(raw == null || raw.isEmpty) return [];
-    try{
-      final list = json.decode(raw) as List<dynamic>;
-      return list.map((e) => TodoModel.fromJson(e as Map<String,dynamic>)).toList();
-    } catch(_){
-      return [];
-    }
+    return await _service.loadTodos();
+  }
+
+  @override
+  Future<List<TodoModel>> addTodo(String title, String description, List<TodoModel> current) async {
+    await _service.addTodos(title, description, current);
+    return await _service.loadTodos();
+  }
+
+  @override
+  Future<List<TodoModel>> toggleTodo(int id, List<TodoModel> current) async {
+    await _service.toggleTodo(id, current);
+    return await _service.loadTodos();
+  }
+
+  @override
+  Future<List<TodoModel>> deleteTodo(int id, List<TodoModel> current) async {
+    await _service.deleteTodo(id, current);
+    return await _service.loadTodos();
+  }
+
+  @override
+  Future<List<TodoModel>> updateTodo(TodoModel updatedTodo, List<TodoModel> current) async {
+    await _service.updateTodo(updatedTodo, current);
+    return await _service.loadTodos();
+  }
+
+  @override
+  Future<List<TodoModel>> clearCompleted(List<TodoModel> current) async {
+    await _service.clearCompleted(current);
+    return await _service.loadTodos();
   }
 
   @override
   Future<void> saveTodos(List<TodoModel> todos) async {
-    final list = todos.map((t) => t.toJson()).toList();
-    await _prefs.setString(_kTodosKey, json.encode(list));
-    _controller.add(todos);
+    await _service.saveAll(todos);
   }
 
   @override
-  Stream<List<TodoModel>> getTodos() {
-    loadTodos().then((value) => _controller.add(value));
-    return _controller.stream;
-  }
+  Stream<List<TodoModel>> getTodos() => _service.getTodos();
+
 }

@@ -4,8 +4,6 @@ import 'package:login_todo/bloc/auth_bloc/auth_bloc.dart';
 import 'package:login_todo/bloc/auth_bloc/auth_event.dart';
 import 'package:login_todo/bloc/todo_bloc/todo_bloc.dart';
 import 'package:login_todo/bloc/todo_bloc/todo_event.dart';
-import 'package:login_todo/bloc/todo_bloc/todo_state.dart';
-import 'package:login_todo/models/todos/todo_model.dart';
 import '../../models/enums/overview_option.dart';
 
 class TodoOverviewOptionButton extends StatelessWidget {
@@ -13,11 +11,7 @@ class TodoOverviewOptionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final todos = context.select((TodoBloc bloc) {
-      final state = bloc.state;
-      return state is TodosLoadSuccess ? state.todos : <TodoModel>[];
-    });
-
+    final todos = context.select((TodoBloc bloc) => bloc.state.todos);
     final hasTodos = todos.isNotEmpty;
     final completedTodosAmount = todos.where((todo) => todo.isCompleted).length;
 

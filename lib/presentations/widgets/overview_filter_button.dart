@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:login_todo/bloc/todo_bloc/todo_bloc.dart';
-import 'package:login_todo/bloc/todo_bloc/todo_state.dart';
 import '../../bloc/todo_bloc/todo_event.dart';
 import '../../models/enums/todo_type.dart';
 
@@ -10,29 +9,18 @@ class TodoOverviewFilterButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final activeFilter = context.select(
-          (TodoBloc bloc) {
-        final state = bloc.state;
-        return state is TodosLoadSuccess ? state.filter : TodosViewFilter.all;
-      },
-    );
-
+    final activeFilter = context.select((TodoBloc bloc) => bloc.state.filter);
     return PopupMenuButton<TodosViewFilter>(
       shape: const ContinuousRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(16)),
       ),
       initialValue: activeFilter,
       onSelected: (filter) {
-        context.read<TodoBloc>().add(
-          TodoOverviewFilterChanged(filter),
-        );
+        context.read<TodoBloc>().add(TodoOverviewFilterChanged(filter));
       },
       itemBuilder: (context) {
         return [
-          PopupMenuItem(
-            value: TodosViewFilter.all,
-            child: Text("Show all"),
-          ),
+          PopupMenuItem(value: TodosViewFilter.all, child: Text("Show all")),
           PopupMenuItem(
             value: TodosViewFilter.activeOnly,
             child: Text("Show active"),

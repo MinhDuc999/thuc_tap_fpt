@@ -5,14 +5,31 @@ import 'package:login_todo/bloc/todo_bloc/todo_state.dart';
 import 'package:login_todo/bloc/todo_bloc/todo_event.dart';
 import 'package:login_todo/presentations/pages/edit_todo_page.dart';
 
-class TodoOverviewPage extends StatelessWidget {
+
+
+class TodoOverviewPage extends StatefulWidget {
   const TodoOverviewPage({super.key});
+
+  @override
+  State<TodoOverviewPage> createState() => _TodoOverviewPageState();
+}
+
+class _TodoOverviewPageState extends State<TodoOverviewPage> {
+  late TodoBloc _todoBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _todoBloc = context.read<TodoBloc>();
+    _todoBloc.add(TodoLoadRequested());
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<TodoBloc, TodoState>(
+      bloc: _todoBloc,
       listenWhen: (previous, current) =>
-          previous.lastDeletedTodo != current.lastDeletedTodo &&
+      previous.lastDeletedTodo != current.lastDeletedTodo &&
           current.lastDeletedTodo != null,
       listener: (context, state) {
         final deletedTodo = state.lastDeletedTodo!;
@@ -22,24 +39,27 @@ class TodoOverviewPage extends StatelessWidget {
           ..showSnackBar(
             SnackBar(
               content: Text('Đã xóa ${deletedTodo.title}'),
+              duration: const Duration(seconds: 3),
               action: SnackBarAction(
                 label: 'Undo',
                 onPressed: () {
                   message.hideCurrentSnackBar();
-                  context.read<TodoBloc>().add(TodoUndoDeletionRequested());
+                  _todoBloc.add(const TodoUndoDeletionRequested());
                 },
               ),
             ),
           );
       },
       builder: (context, state) {
-        if (state is TodosLoadInProgress) {
+        if (state.status == TodoStatus.loading) {
           return const Center(child: CircularProgressIndicator());
         }
-        if (state is TodosLoadFailure) {
-          return Center(child: Text('Error: ${state.message}'));
+        if (state.status == TodoStatus.failure) {
+          return Center(
+            child: Text('Error: ${state.errorMessage ?? "Lỗi"}'),
+          );
         }
-        if (state is TodosLoadSuccess) {
+        if (state.status == TodoStatus.success) {
           final todos = state.filteredTodos.toList();
           if (todos.isEmpty) {
             return const Center(child: Text('No todos'));
@@ -58,7 +78,7 @@ class TodoOverviewPage extends StatelessWidget {
                   child: const Icon(Icons.delete, color: Colors.white),
                 ),
                 onDismissed: (_) {
-                  context.read<TodoBloc>().add(TodoDeleteRequested(t.id));
+                  _todoBloc.add(TodoDeleteRequested(t.id));
                   final message = ScaffoldMessenger.of(context);
                   message
                     ..hideCurrentSnackBar()
@@ -68,7 +88,7 @@ class TodoOverviewPage extends StatelessWidget {
                         action: SnackBarAction(
                           label: 'Undo',
                           onPressed: () {
-                            context.read<TodoBloc>().add(TodoUndoDeletionRequested());
+                            _todoBloc.add(const TodoUndoDeletionRequested());
                           },
                         ),
                       ),
@@ -78,28 +98,23 @@ class TodoOverviewPage extends StatelessWidget {
                   leading: Checkbox(
                     value: t.isCompleted,
                     onChanged: (_) =>
-                        context.read<TodoBloc>().add(TodoToggleRequested(t.id)),
+                        _todoBloc.add(TodoToggleRequested(t.id)),
                   ),
                   title: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(t.title),
-                      Text(t.description),
-                    ],
+                    children: [Text(t.title), Text(t.description)],
                   ),
                   onTap: () async {
-                    await Navigator.of(context).push(
-                      EditTodoPage.route(initialTodo: t),
-                    );
+                    await Navigator.of(context)
+                        .push(EditTodoPage.route(initialTodo: t));
                     if (context.mounted) {
-                      context.read<TodoBloc>().add(TodoLoadRequested());
+                      _todoBloc.add(const TodoLoadRequested());
                     }
                   },
                 ),
               );
             },
           );
-
         }
         return const SizedBox.shrink();
       },

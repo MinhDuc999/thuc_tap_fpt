@@ -1,14 +1,22 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:login_todo/bloc/todo_bloc/todo_event.dart';
 import 'package:login_todo/bloc/todo_bloc/todo_state.dart';
-import 'package:login_todo/data/service/todos/todo_service.dart';
+import 'package:login_todo/core/injection.dart';
+import 'package:login_todo/domain/usecase/todo/todo_usecase.dart';
 import 'package:login_todo/models/todos/todo_model.dart';
 
-class TodoBloc extends Bloc<TodoEvent, TodoState>{
-  final TodoService _service;
+class TodoBloc extends Bloc<TodoEvent, TodoState> {
+  final LoadTodosUseCase _loadTodosUseCase = getIt<LoadTodosUseCase>();
+  final AddTodoUseCase _addTodoUseCase = getIt<AddTodoUseCase>();
+  final ToggleTodoUseCase _toggleTodoUseCase = getIt<ToggleTodoUseCase>();
+  final DeleteTodoUseCase _deleteTodoUseCase = getIt<DeleteTodoUseCase>();
+  final UndoDeleteTodoUseCase _undoDeleteTodoUseCase = getIt<UndoDeleteTodoUseCase>();
+  final UpdateTodoUseCase _updateTodoUseCase = getIt<UpdateTodoUseCase>();
+  final ClearCompletedUseCase _clearCompletedUseCase = getIt<ClearCompletedUseCase>();
+  final ToggleAllTodosUseCase _toggleAllTodosUseCase = getIt<ToggleAllTodosUseCase>();
   List<TodoModel> _cache = [];
 
-  TodoBloc(this._service): super(TodosInitial()){
+  TodoBloc() : super(const TodoState()) {
     on<TodoLoadRequested>(_onLoad);
     on<TodoAddRequested>(_onAdd);
     on<TodoToggleRequested>(_onToggle);
@@ -18,101 +26,81 @@ class TodoBloc extends Bloc<TodoEvent, TodoState>{
     on<TodoOverviewFilterChanged>(_onFilterChanged);
     on<TodoUndoDeletionRequested>(_onUndoDelete);
     on<TodoToggleAllRequested>(_onToggleAll);
-
   }
 
-  Future<void> _onLoad(TodoLoadRequested event, Emitter<TodoState> emit) async{
-    emit(TodosLoadInProgress());
-    try{
-      _cache = await _service.loadTodos();
-      emit(TodosLoadSuccess(List<TodoModel>.from(_cache)));
-    } catch (e){
-      emit(TodosLoadFailure(e.toString()));
+  Future<void> _onLoad(TodoLoadRequested event, Emitter<TodoState> emit) async {
+    emit(state.copyWith(status: TodoStatus.loading));
+    try {
+      final todos = await _loadTodosUseCase.execute();
+      _cache = todos;
+      emit(state.copyWith(status: TodoStatus.success, todos: List<TodoModel>.from(_cache)));
+    } catch (e) {
+      emit(state.copyWith(status: TodoStatus.failure, errorMessage: e.toString()));
     }
   }
 
   Future<void> _onAdd(TodoAddRequested event, Emitter<TodoState> emit) async {
-    await _service.addTodos(event.title, event.description, _cache);
-    _cache = await _service.loadTodos();
-    emit(TodosLoadSuccess(List<TodoModel>.from(_cache)));
+    final todos = await _addTodoUseCase.execute(event.title, event.description, _cache);
+    _cache = todos;
+    emit(state.copyWith(status: TodoStatus.success, todos: List<TodoModel>.from(_cache)));
   }
 
   Future<void> _onToggle(TodoToggleRequested event, Emitter<TodoState> emit) async {
-    await _service.toggleTodo(event.id, _cache);
-    _cache = await _service.loadTodos();
-    emit(TodosLoadSuccess(List<TodoModel>.from(_cache)));
+    final todos = await _toggleTodoUseCase.execute(event.id, _cache);
+    _cache = todos;
+    emit(state.copyWith(status: TodoStatus.success, todos: List<TodoModel>.from(_cache)));
   }
 
-  Future<void> _onDelete(
-      TodoDeleteRequested event, Emitter<TodoState> emit) async {
-    final todoToDelete = _cache.firstWhere((t) => t.id == event.id);
-    await _service.deleteTodo(event.id, _cache);
-    _cache = await _service.loadTodos();
-
-    emit(TodosLoadSuccess(
-      List<TodoModel>.from(_cache),
+  Future<void> _onDelete(TodoDeleteRequested event, Emitter<TodoState> emit) async {
+    final (todos, todoToDelete) = await _deleteTodoUseCase.execute(event.id, _cache);
+    _cache = todos;
+    emit(state.copyWith(
+      status: TodoStatus.success,
+      todos: List<TodoModel>.from(_cache),
       lastDeletedTodo: todoToDelete,
     ));
   }
 
-  Future<void> _onUndoDelete(
-      TodoUndoDeletionRequested event, Emitter<TodoState> emit) async {
-    if (state is TodosLoadSuccess) {
-      final currentState = state as TodosLoadSuccess;
-      final lastDeleted = currentState.lastDeletedTodo;
-      if (lastDeleted != null) {
-        await _service.addTodos(lastDeleted.title, lastDeleted.description, _cache);
-        _cache = await _service.loadTodos();
-        emit(currentState.copyWith(
-          todos: () => List<TodoModel>.from(_cache),
-          lastDeletedTodo: () => null,
-        ));
-      }
+  Future<void> _onUndoDelete(TodoUndoDeletionRequested event, Emitter<TodoState> emit) async {
+    final lastDeleted = state.lastDeletedTodo;
+    if (lastDeleted != null) {
+      final todos = await _undoDeleteTodoUseCase.execute(lastDeleted, _cache);
+      _cache = todos;
+      emit(state.copyWith(
+        status: TodoStatus.success,
+        todos: List<TodoModel>.from(_cache),
+        lastDeletedTodo: null,
+      ));
     }
   }
 
-
-  Future<void> _onUpdate(TodoUpdateRequested event, Emitter<TodoState> emit) async{
-    await _service.updateTodo(event.id,newTitle: event.newTitle, newDescription: event.newDescription, current: _cache);
-    _cache = await _service.loadTodos();
-    emit(TodosLoadSuccess(List<TodoModel>.from(_cache)));
+  Future<void> _onUpdate(TodoUpdateRequested event, Emitter<TodoState> emit) async {
+    final existingTodo = _cache.firstWhere((t) => t.id == event.id);
+    final updatedTodo = existingTodo.copyWith(
+      title: event.newTitle ?? existingTodo.title,
+      description: event.newDescription ?? existingTodo.description,
+    );
+    final todos = await _updateTodoUseCase.execute(updatedTodo, _cache);
+    _cache = todos;
+    emit(state.copyWith(
+        status: TodoStatus.success,
+        todos: List<TodoModel>.from(_cache)
+    ));
   }
 
   Future<void> _onClearCompleted(TodoClearCompletedRequested event, Emitter<TodoState> emit) async {
-    await _service.clearCompleted(_cache);
-    _cache = await _service.loadTodos();
-    emit(TodosLoadSuccess(List<TodoModel>.from(_cache)));
+    final todos = await _clearCompletedUseCase.execute(_cache);
+    _cache = todos;
+    emit(state.copyWith(status: TodoStatus.success, todos: List<TodoModel>.from(_cache)));
   }
 
-  void _onFilterChanged(
-      TodoOverviewFilterChanged event,
-      Emitter<TodoState> emit,
-      ) {
-    if (state is TodosLoadSuccess) {
-      final currentState = state as TodosLoadSuccess;
-      emit(
-        currentState.copyWith(
-          filter: () => event.filter,
-        ),
-      );
-    }
+  void _onFilterChanged(TodoOverviewFilterChanged event, Emitter<TodoState> emit) {
+    emit(state.copyWith(filter: event.filter));
   }
 
-  Future<void> _onToggleAll(
-      TodoToggleAllRequested event,
-      Emitter<TodoState> emit,
-      ) async {
-    final allCompleted = _cache.every((t) => t.isCompleted);
-    final newList = _cache
-        .map((t) => t.copyWith(isCompleted: !allCompleted))
-        .toList();
-
-    await _service.saveAll(newList);
-    _cache = await _service.loadTodos();
-
-    emit(TodosLoadSuccess(List<TodoModel>.from(_cache)));
+  Future<void> _onToggleAll(TodoToggleAllRequested event, Emitter<TodoState> emit) async {
+    final todos = await _toggleAllTodosUseCase.execute(_cache);
+    _cache = todos;
+    emit(state.copyWith(status: TodoStatus.success, todos: List<TodoModel>.from(_cache)));
   }
-
-
-
 }

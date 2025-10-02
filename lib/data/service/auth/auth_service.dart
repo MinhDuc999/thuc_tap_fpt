@@ -1,10 +1,17 @@
-import 'package:login_todo/domain/repositories/auth/auth_repository.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:login_todo/core/injection.dart';
 
-class AuthService{
-  AuthRepository authRepository;
-  AuthService({required this.authRepository});
+class AuthService {
+  //final FirebaseAuth _firebaseAuth;
+  final _firebaseAuth = getIt<FirebaseAuth>();
 
-  Future<void> logIn(String email, String password) => authRepository.logIn(email, password);
-  Future<void> logOut() => authRepository.logOut();
-  Stream<bool> get userChanges => authRepository.userChanges;
+  Future<void> logIn(String email, String password) async {
+    await _firebaseAuth.signInWithEmailAndPassword(email: email, password: password);
+  }
+
+  Future<void> logOut() async {
+    await _firebaseAuth.signOut();
+  }
+
+  Stream<bool> get userChanges => _firebaseAuth.authStateChanges().map((u) => u != null);
 }

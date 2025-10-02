@@ -1,22 +1,25 @@
-import'package:equatable/equatable.dart';
+import 'package:equatable/equatable.dart';
+import 'package:login_todo/models/enums/auth_status.dart';
 
-abstract class AuthState extends Equatable{
+class AuthState extends Equatable {
+  final AuthStatus status;
+  final String? message;
+
+  const AuthState({
+    this.status = AuthStatus.initial,
+    this.message,
+  });
+
+  AuthState copyWith({
+    AuthStatus? status,
+    String? message,
+  }) {
+    return AuthState(
+      status: status ?? this.status,
+      message: message ?? this.message,
+    );
+  }
+
   @override
-  List<Object?> get props =>[];
-}
-
-class AuthInitial extends AuthState {}
-
-class AuthLoading extends AuthState {}
-
-class AuthAuthenticated extends AuthState {}
-
-class AuthUnauthenticated extends AuthState {}
-
-class AuthFailure extends AuthState{
-  final String message;
-
-  AuthFailure(this.message);
-  @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [status, message];
 }

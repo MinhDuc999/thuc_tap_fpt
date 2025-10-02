@@ -15,7 +15,7 @@ class StatsState extends Equatable{
     StatsStatus? status,
     int? completed,
     int? active,
-}) {
+  }) {
     return StatsState(
       status: status ?? this.status,
       completed: completed ?? this.completed,

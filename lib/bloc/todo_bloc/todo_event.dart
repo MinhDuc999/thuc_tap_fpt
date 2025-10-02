@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-
 import '../../models/enums/todo_type.dart';
 
 abstract class TodoEvent extends Equatable{

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:login_todo/bloc/auth_bloc/auth_bloc.dart';
-import 'package:login_todo/bloc/auth_bloc/auth_event.dart';
 import 'package:login_todo/bloc/auth_bloc/auth_state.dart';
+import 'package:login_todo/models/enums/auth_status.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -12,56 +12,62 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _email = TextEditingController();
-  final _pass = TextEditingController();
+  late AuthBloc _authBloc;
 
   @override
-  void dispose() {
-    _email.dispose();
-    _pass.dispose();
-    super.dispose();
-  }
-
-  void _submit(){
-    final email = _email.text.trim();
-    final pass = _pass.text;
-    context.read<AuthBloc>().add(AuthLogInRequested(email: email, password: pass));
+  void initState() {
+    super.initState();
+    _authBloc = context.read<AuthBloc>();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Login", style: TextStyle(fontSize: 28),),
+        title: const Text(
+          "Login",
+          style: TextStyle(fontSize: 28),
+        ),
         centerTitle: true,
         backgroundColor: Colors.blue[200],
       ),
       body: BlocConsumer<AuthBloc, AuthState>(
-        listener: (context, state){
-          if(state is AuthFailure){
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
+        listener: (context, state) {
+          if (state.status == AuthStatus.failure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message ?? "Đăng nhập thất bại")),
+            );
           }
         },
-        builder: (context, state){
-          if(state is AuthLoading) return const Center(child: CircularProgressIndicator(),);
-          return Padding(padding: EdgeInsets.all(16),
-              child: Form(
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: _email,
-                      decoration: const InputDecoration(labelText: 'Email'),
-                    ),
-                    TextFormField(
-                      controller: _pass,
-                      decoration: const InputDecoration(labelText: 'Password'),
-                    ),
-                    const SizedBox(height: 30,),
-                    ElevatedButton(onPressed: _submit, child: const Text('Login'))
-                  ],
-          )),
+        builder: (context, state) {
+          if (state.status == AuthStatus.loading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: Form(
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: _authBloc.emailController,
+                    decoration: const InputDecoration(labelText: 'Email'),
+                  ),
+                  TextFormField(
+                    controller: _authBloc.passwordController,
+                    decoration: const InputDecoration(labelText: 'Password'),
+                    obscureText: true,
+                  ),
+                  const SizedBox(height: 30),
+                  ElevatedButton(
+                    onPressed: _authBloc.submitLogin,
+                    child: const Text('Login'),
+                  ),
+                ],
+              ),
+            ),
           );
-        }),
+        },
+      ),
     );
   }
 }

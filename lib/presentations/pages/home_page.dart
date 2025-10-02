@@ -3,44 +3,41 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:login_todo/bloc/home/home_cubit.dart';
 import 'package:login_todo/bloc/home/home_state.dart';
 import 'package:login_todo/bloc/todo_bloc/todo_bloc.dart';
-import 'package:login_todo/bloc/todo_bloc/todo_event.dart';
 import 'package:login_todo/presentations/pages/stats_page.dart';
 import 'package:login_todo/presentations/pages/todo_overview_page.dart';
 import 'package:login_todo/presentations/widgets/overview_filter_button.dart';
 import 'package:login_todo/presentations/widgets/overview_option_button.dart';
 import 'package:login_todo/presentations/widgets/tab_button.dart';
 
-
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => TodoBloc(),
+      child: BlocProvider(
+        create: (context) => HomeCubit(todoBloc: context.read<TodoBloc>()),
+        child: const HomeView(),
+      ),
+    );
+  }
 }
 
-class _HomePageState extends State<HomePage> {
-  final _titleController = TextEditingController();
-  final _descController = TextEditingController();
+class HomeView extends StatefulWidget {
+  const HomeView({super.key});
+
+  @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  late HomeCubit _homeCubit;
+
   @override
   void initState() {
     super.initState();
-    context.read<TodoBloc>().add(TodoLoadRequested());
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _descController.dispose();
-    super.dispose();
-  }
-
-  void _add() {
-    final title = _titleController.text.trim();
-    final desc = _descController.text.trim();
-    if (title.isEmpty) return;
-    context.read<TodoBloc>().add(TodoAddRequested(title, desc));
-    _titleController.clear();
-    _descController.clear();
+    _homeCubit = context.read<HomeCubit>();
   }
 
   @override
@@ -48,18 +45,12 @@ class _HomePageState extends State<HomePage> {
     final selectedTab = context.select((HomeCubit cubit) => cubit.state.tab);
     return Scaffold(
       appBar: AppBar(
-        title: Text("Todos"),
-        actions: [
-          TodoOverviewFilterButton(),
-          TodoOverviewOptionButton()
-        ],
+        title: const Text("Todos"),
+        actions: const [TodoOverviewFilterButton(), TodoOverviewOptionButton()],
       ),
       body: IndexedStack(
         index: selectedTab.index,
-        children: const [
-          TodoOverviewPage(),
-          StatsPage(),
-        ],
+        children: const [TodoOverviewPage(), StatsPage()],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionButton(
@@ -84,7 +75,7 @@ class _HomePageState extends State<HomePage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextField(
-                      controller: _titleController,
+                      controller: _homeCubit.titleController,
                       decoration: const InputDecoration(
                         labelText: "Title",
                         border: OutlineInputBorder(),
@@ -92,7 +83,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     const SizedBox(height: 12),
                     TextField(
-                      controller: _descController,
+                      controller: _homeCubit.descController,
                       decoration: const InputDecoration(
                         labelText: "Description",
                         border: OutlineInputBorder(),
@@ -101,7 +92,7 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
-                        _add();
+                        _homeCubit.submitAddTodo();
                         Navigator.of(context).pop();
                       },
                       child: const Text("Add Todo"),
@@ -114,7 +105,6 @@ class _HomePageState extends State<HomePage> {
         },
         child: const Icon(Icons.add),
       ),
-
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
         child: Row(
@@ -133,7 +123,6 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-
     );
   }
 }
