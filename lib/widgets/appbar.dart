@@ -4,7 +4,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const CustomAppBar({super.key});
+  final String title;
+
+  const CustomAppBar({super.key, required this.title});
 
   @override
   Size get preferredSize => const Size.fromHeight(60);
@@ -32,7 +34,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           Expanded(
             child: Text(
-              'Chỉnh thanh điều hướng',
+              title,
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.manrope(

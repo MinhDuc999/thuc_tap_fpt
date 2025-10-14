@@ -85,6 +85,7 @@ flutter:
     - assets/icons/loi.svg
     - assets/icons/dat_lenh.svg
     - assets/icons/default.svg
+    - assets/icons/huy.svg
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

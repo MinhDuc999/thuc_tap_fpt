@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -128,9 +127,9 @@ class _NavigationBarPageState extends State<NavigationBarPage>
           final visibleFeatures = currentFeatures.where((feature) => !selectedSlots.contains(feature)).toList();
           return Scaffold(
             backgroundColor: Color(0xFF111315),
-            appBar: const CustomAppBar(),
+            appBar: const CustomAppBar(title: 'Chỉnh thanh điều hướng',),
             body: Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: EdgeInsets.only(left: 12,right: 12,top: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -154,7 +153,7 @@ class _NavigationBarPageState extends State<NavigationBarPage>
                             child: Column(
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.all(8.0),
+                                  padding: EdgeInsets.only(top: 8.h,left: 8.w,right: 8.w,bottom: 3.h),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.max,
                                     children: List.generate(selectedSlots.length, (index) {
@@ -167,9 +166,8 @@ class _NavigationBarPageState extends State<NavigationBarPage>
                                             if (!shouldShake) {
                                               return child!;
                                             }
-                                            //final angle = sin((_animationController.value * 2 * pi) + (index * 0.5)) * 0.15;
                                             //final angle = sin(_animationController.value * 2 * pi) * 0.07;
-                                            final angle = cos(_animationController.value * 2 * pi) * 0.18;
+                                            final angle = cos(_animationController.value * 2 * pi) * 0.09;
                                             return Transform.rotate(
                                               angle: angle,
                                               child: child,
@@ -212,52 +210,55 @@ class _NavigationBarPageState extends State<NavigationBarPage>
                                   ),
                                 ),
                                 //Expanded(child: SizedBox(height: 2.h)),
-                                Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: List.generate(selected.length, (index) {
-                                    final isActive = selectedIndex == index;
-                                    final label = selected[index] ?? '';
-                                    return Expanded(
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          context.read<NavigationBloc>().add(ChangeButton(index));
-                                        },
-                                        child: Column(
-                                          children: [
-                                            Container(
-                                              width: 16.w,
-                                              height: 16.w,
-                                              decoration: BoxDecoration(
-                                                border: isActive ? Border.all(
-                                                  width: 3.5.w,
-                                                  color: Color(0xFF1AAF74)) :
-                                                Border.all(
-                                                  width: 0.5.w,
-                                                  color: Color(0xFF6F767E).withValues(alpha: 0.3)),
-                                                shape: BoxShape.circle,
-                                                color: isActive ? const Color(0xFFFCFCFC) : const Color(0xFF33383F),
+                                Padding(
+                                  padding: EdgeInsets.only(right: 12.w, left: 12.w),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: List.generate(selected.length, (index) {
+                                      final isActive = selectedIndex == index;
+                                      final label = selected[index] ?? 'Mặc định';
+                                      return Expanded(
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            context.read<NavigationBloc>().add(ChangeButton(index));
+                                          },
+                                          child: Column(
+                                            children: [
+                                              Container(
+                                                width: 16.w,
+                                                height: 16.w,
+                                                decoration: BoxDecoration(
+                                                  border: isActive ? Border.all(
+                                                    width: 3.5.w,
+                                                    color: Color(0xFF1AAF74)) :
+                                                  Border.all(
+                                                    width: 0.5.w,
+                                                    color: Color(0xFF6F767E).withValues(alpha: 0.3)),
+                                                  shape: BoxShape.circle,
+                                                  color: isActive ? const Color(0xFFFCFCFC) : const Color(0xFF33383F),
+                                                ),
                                               ),
-                                            ),
-                                            SizedBox(height: 4.h),
-                                            Text(
-                                              isActive ? label : '',
-                                              style: GoogleFonts.manrope(
-                                                color: isActive ? const Color(0xFF1AAF74) : const Color(0xFF6F767E),
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 12.sp,
+                                              SizedBox(height: 4.h),
+                                              Text(
+                                                isActive ? label : '',
+                                                style: GoogleFonts.manrope(
+                                                  color: isActive ? const Color(0xFF1AAF74) : const Color(0xFF6F767E),
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 12.sp,
+                                                ),
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                    );
-                                  }),
+                                      );
+                                    }),
+                                  ),
                                 ),
                               ],
                             ),
                           ),
                         ),
-                        SizedBox(height: 8.h),
+                        SizedBox(height: 16.h),
                         Row(
                           children: [
                             if (!hasEnoughSelected) ...[
@@ -300,8 +301,8 @@ class _NavigationBarPageState extends State<NavigationBarPage>
                                   borderRadius: BorderRadius.circular(28.r),
                                 ),
                                 child: SizedBox(
-                                  width: 14.33.w,
-                                  height: 14.33.h,
+                                  // width: 14.33.w,
+                                  // height: 14.33.h,
                                   child: SvgPicture.asset(
                                       "assets/icons/search.svg",
                                     ),
@@ -332,113 +333,121 @@ class _NavigationBarPageState extends State<NavigationBarPage>
                   ),
                   SizedBox(height: 24.h),
                   Expanded(
-                    child: GridView.builder(
-                      itemCount: currentFeatures.where((feature) => !selectedSlots.contains(feature)).length,
-                      gridDelegate:
-                          SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 4,
-                            mainAxisSpacing: 16.h,
-                            crossAxisSpacing: 36.w,
-                          ),
-                      itemBuilder: (context, index) {
-                        final name = visibleFeatures[index];
-                        final icon = featureIcons[name];
-                        return Draggable<String>(
-                          data: name,
-                          feedback: Transform.translate(
-                            offset: Offset(-25, 0),
-                            child: Material(
-                              color: Colors.transparent,
-                              child: Column(
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Color(0xFF1AAF74).withValues(alpha: 0.2),
-                                          spreadRadius: 1,
-                                          blurRadius: 5,
-                                          offset: Offset(0, 3)
-                                        )
-                                      ]
-                                    ),
-                                    child: SvgPicture.asset(
-                                      icon!,
-                                      width: 24.w,
-                                      height: 24.h,
-                                    ),
-                                  ),
-                                ],
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal:20.w ),
+                        child: GridView.builder(
+                          itemCount: currentFeatures.where((feature) => !selectedSlots.contains(feature)).length,
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 4,
+                                mainAxisSpacing: 16.h,
+                                crossAxisSpacing: 24.5.w,
+                                childAspectRatio: 0.9,
                               ),
-                            ),
-                          ),
-                          childWhenDragging: Center(
-                            child: Opacity(
-                              opacity: 0.3,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  SvgPicture.asset(
-                                    icon,
-                                    width: 24.w,
-                                    height: 24.h,
-                                  ),
-                                  SizedBox(height: 4.h),
-                                  Expanded(
-                                    child: Text(
-                                      name,
-                                      textAlign: TextAlign.center,
-                                      style: GoogleFonts.manrope(
-                                        fontSize: 12.sp,
-                                        fontWeight: FontWeight.w500,
-                                        height: 1.5.h,
-                                        letterSpacing: 0,
-                                        color: Color(0xFF747A81),
+                          itemBuilder: (context, index) {
+                            final name = visibleFeatures[index];
+                            final icon = featureIcons[name];
+                            return Draggable<String>(
+                              data: name,
+                              feedback: Transform.translate(
+                                offset: Offset(-25, 0),
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Color(0xFF1AAF74).withValues(alpha: 0.2),
+                                              spreadRadius: 1,
+                                              blurRadius: 5,
+                                              offset: Offset(0, 3)
+                                            )
+                                          ]
+                                        ),
+                                        child: SvgPicture.asset(
+                                          icon!,
+                                        ),
                                       ),
-                                    ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
-                          ),
-                          child: GestureDetector(
-                            onTap: () {
-                              final emptyIndex = selectedSlots.indexWhere((e) => e == null);
-                              if (emptyIndex != -1) {
-                                context.read<NavigationBloc>().add(AllFeature(name));
-                              }
-                            },
-                            child: Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  SvgPicture.asset(
-                                    icon,
-                                    width: 24.w,
-                                    height: 24.h,
-                                  ),
-                                  SizedBox(height: 4.h),
-                                  Expanded(
-                                    child: Text(
-                                      name,
-                                      textAlign: TextAlign.center,
-                                      style: GoogleFonts.manrope(
-                                        fontSize: 12.sp,
-                                        fontWeight: FontWeight.w500,
-                                        height: 1.5.h,
-                                        letterSpacing: 0,
-                                        color: Color(0xFF747A81),
+                              childWhenDragging: Center(
+                                child: Opacity(
+                                  opacity: 0.3,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SizedBox(
+                                        height: 23.h,
+                                        child: SvgPicture.asset(
+                                          icon,
+                                        ),
                                       ),
-                                    ),
+                                      SizedBox(height: 4.h),
+                                      Expanded(
+                                        child: Text(
+                                          name,
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: GoogleFonts.manrope(
+                                            fontSize: 12.sp,
+                                            fontWeight: FontWeight.w500,
+                                            height: 1.5.h,
+                                            letterSpacing: 0,
+                                            color: Color(0xFF747A81),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
-                          ),
-                        );
-                      },
+                              child: GestureDetector(
+                                  onTap: () {
+                                    final emptyIndex = selectedSlots.indexWhere((e) => e == null);
+                                    if (emptyIndex != -1) {
+                                      context.read<NavigationBloc>().add(AllFeature(name));
+                                    }else{
+                                      context.read<NavigationBloc>().add(ReplaceFeature(name, 3));
+                                    }
+                                  },
+                                child: Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SizedBox(
+                                          height: 23.h,
+                                          child: SvgPicture.asset(icon),
+                                      ),
+                                      SizedBox(height: 4.h),
+                                      Expanded(
+                                        child: Text(
+                                          name,
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: GoogleFonts.manrope(
+                                            fontSize: 12.sp,
+                                            fontWeight: FontWeight.w500,
+                                            height: 1.5.h,
+                                            letterSpacing: 0,
+                                            color: Color(0xFF747A81),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -467,15 +476,15 @@ Widget _navItem(String label, String iconPath, {bool isDraggingOver = false}) {
                     Color(0xFF1AAF74),
                     BlendMode.srcIn,
                   ),
-                  width: 24.w,
-                  height: 24.h,
+                  // width: 24.w,
+                  // height: 24.h,
                 ),
               ),
               Opacity(
                 opacity: 0.5,
                 child: Container(
-                  width: 18.2.w,
-                  height: 19.2.h,
+                  width: 16.2.w,
+                  height: 17.2.h,
                   decoration: BoxDecoration(
                     color: const Color(0xFF1AAF74),
                     borderRadius: BorderRadius.circular(4),
@@ -499,6 +508,7 @@ Widget _navItem(String label, String iconPath, {bool isDraggingOver = false}) {
         alignment: Alignment.center,
         children: [
           Container(
+            height: 23.h,
             decoration: BoxDecoration(
               boxShadow: isLabel ? [
                 BoxShadow(
@@ -513,25 +523,24 @@ Widget _navItem(String label, String iconPath, {bool isDraggingOver = false}) {
               iconPath,
               colorFilter: isLabel
                   ? const ColorFilter.mode(Color(0xFF1AAF74), BlendMode.srcIn) : null,
-              width:isLabel? 24.w : 18.w,
-              height:isLabel ? 24.h : 18.h,
+              width:isLabel? null : 15.w,
+              height:isLabel ? 20.h : 15.h,
             ),
           ),
           if (isLabel)
             Positioned(
-              right: -8,
-              top: -10,
+              right: -10,
+              top: -8,
               child: Container(
+                padding: EdgeInsets.zero,
                 decoration: BoxDecoration(
                   border: Border.all(width: 4.w, color: Color(0xFF1A1D1F)),
-                  color: Color(0xFF1A1D1F),
+                  color: Colors.transparent,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  Icons.remove_circle,
-                  size: 14.sp,
-                  color: Color(0xFF6F767E),
-                ),
+                child: SvgPicture.asset(
+                  'assets/icons/huy.svg'
+                )
               ),
             ),
         ],
@@ -542,13 +551,13 @@ Widget _navItem(String label, String iconPath, {bool isDraggingOver = false}) {
         child: Text(
             label,
             textAlign: TextAlign.center,
-            //maxLines: 1,
-            //overflow: TextOverflow.ellipsis,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.manrope(
               color: isLabel ? Color(0xFF1AAF74) : Color(0xFF747A81),
               fontWeight: FontWeight.w700,
               fontSize: isLabel ? 12.sp : 8.sp,
-              height: 1.5.h,
+              height: 1.3.h,
               letterSpacing: 0,
             ),
           ),
@@ -573,15 +582,15 @@ Widget _navPlaceholder({bool isDraggingOver = false}) {
                   isDraggingOver ? Color(0xFF1AAF74) : Color(0xFF6F767E),
                   BlendMode.srcIn,
                 ),
-                width: 24.w,
-                height: 24.h,
+                // width: 24.w,
+                // height: 24.h,
               ),
             ),
             Opacity(
               opacity: isDraggingOver? 0.5 : 1,
               child: Container(
-                width: 18.2.w,
-                height: 19.2.h,
+                width: 16.2.w,
+                height: 17.2.h,
                 decoration: BoxDecoration(
                   color: isDraggingOver ? Color(0xFF1AAF74) : Color(0xFF33383F),
                   borderRadius: BorderRadius.circular(4),
@@ -605,7 +614,7 @@ Widget _tab(String label, bool selected) {
     margin: const EdgeInsets.only(right: 8),
     padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
     decoration: BoxDecoration(
-      color: selected ? Color(0xFF1AAF74) : Color(0xFF33383F4D),
+      color: selected ? Color(0xFF1AAF74) : Color(0x33383F4D),
       borderRadius: BorderRadius.circular(26),
     ),
     child: Center(

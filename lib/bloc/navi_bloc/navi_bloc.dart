@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ui_dieu_huong/bloc/core/injection.dart';
 import 'package:ui_dieu_huong/bloc/navi_bloc/navi_event.dart';
 import 'package:ui_dieu_huong/bloc/navi_bloc/navi_state.dart';
+import 'package:ui_dieu_huong/core/injection.dart';
 import 'package:ui_dieu_huong/doman/usecase/feature/all_feature_usecase.dart';
 import 'package:ui_dieu_huong/doman/usecase/feature/remove_feature_usecase.dart';
 import 'package:ui_dieu_huong/doman/usecase/feature/replace_feature_usecase.dart';
@@ -16,7 +16,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState>{
   final ChangeButtonUsecase _changeButtonUsecase = getIt<ChangeButtonUsecase>();
   NavigationBloc():super(NavigationState(
     selectedSlots: ["Trang chủ", "Sổ lệnh", "Đặt lệnh", "Tài sản", "Ứng dụng"],
-    selected: ["Mặc định", "Mặc định", "Mặc định", "Mặc định", "Mặc định"],
+    selected: ["Mặc định", null, null, null, null],
     selectedIndex: 0,
     selectedTab: 0,
   )){

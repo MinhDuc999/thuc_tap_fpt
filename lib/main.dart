@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:ui_dieu_huong/core/injection.dart' as di;
 import 'package:ui_dieu_huong/presentations/navigationbar_page.dart';
-import 'bloc/core/injection.dart' as di;
 
 void main() async{
   await di.init();
