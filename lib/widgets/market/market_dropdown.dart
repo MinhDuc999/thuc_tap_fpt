@@ -30,7 +30,7 @@ Widget buildMenuButton(
         );
       },
       child: Container(
-        margin: EdgeInsets.only(right: 8.w),
+        margin: EdgeInsets.symmetric(horizontal: 4.w),
         padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 1.h),
         decoration: BoxDecoration(
           color: isSelected ? Color(0xFF1AAF74) : Color(0xFF1A1D1F),
@@ -103,7 +103,7 @@ Widget buildMenuButton(
           }
         },
         child: Container(
-          margin: EdgeInsets.only(right: 8.w),
+          margin: EdgeInsets.symmetric(horizontal: 4.w),
           padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 1.h),
           decoration: BoxDecoration(
             color: backgroundColor,

@@ -11,11 +11,11 @@ import 'package:ui_bang_gia/bloc/market/market_menu_bloc.dart';
 import 'package:ui_bang_gia/bloc/stock/stock_bloc.dart';
 import 'package:ui_bang_gia/bloc/stock/stock_event.dart';
 import 'package:ui_bang_gia/bloc/stock/stock_state.dart';
+import 'package:ui_bang_gia/widgets/market/animatedStockRow.dart';
 import 'package:ui_bang_gia/widgets/market/animatedTopIndices.dart';
 import 'package:ui_bang_gia/widgets/market/appbar.dart';
+import 'package:ui_bang_gia/widgets/market/buildHeaderTable.dart';
 import 'package:ui_bang_gia/widgets/market/table.dart';
-
-import '../widgets/market/animatedStockRow.dart';
 
 class MarketPage extends StatefulWidget {
   const MarketPage({super.key});
@@ -76,6 +76,10 @@ class _MarketPageState extends State<MarketPage> {
 
   @override
   void dispose() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     _scrollController.dispose();
     _scrollBodyController.dispose();
     _scrollBody1Controller.dispose();
@@ -128,16 +132,6 @@ class _MarketPageState extends State<MarketPage> {
       "Đánh bắt"
     ];
 
-    // final Map<String, List<String>> filterCatalog = {
-    //   "Thủy sản": [],
-    //   "Thép": [],
-    //   "Dầu khí": ["VCB"],
-    //   "Khoáng sản": [],
-    //   "Nông sản": [],
-    //   "Chăn nuôi": [],
-    //   "Trồng trọt": [],
-    //   "Đánh bắt": [],
-    // };
     final Map<String, List<String>> filterMarket = {
       "ETF": ["SHB","AAH"],
       "Phái sinh":["CVHM24011","FUEVFVNDD", "E1VFVN300"],
@@ -180,10 +174,23 @@ class _MarketPageState extends State<MarketPage> {
                       pinned: false,
                       floating: false,
                       expandedHeight: 45,
+                      automaticallyImplyLeading: false,
                       backgroundColor: const Color(0xFF111315),
                       flexibleSpace: BlocBuilder<CatalogBloc,CatalogState>(
                         builder: (context,state) {
-                          return CustomAppBar(allMarket: allMarket,filterMarket: filterMarket,allCatalog: state.allCatalog,);
+                          return LayoutBuilder(
+                              builder: (context, constraints) {
+                                final size = MediaQuery.of(context).size;
+                                final orientation = size.width > size.height
+                                    ? Orientation.landscape
+                                    : Orientation.portrait;
+
+                                if (orientation == Orientation.portrait) {
+                                  return const SizedBox.shrink();
+                                }
+                              return CustomAppBar(allMarket: allMarket,filterMarket: filterMarket,allCatalog: state.allCatalog,);
+                            }
+                          );
                         }
                       ),
                     ),
@@ -348,4 +355,3 @@ class _MarketPageState extends State<MarketPage> {
     );
   }
 }
-

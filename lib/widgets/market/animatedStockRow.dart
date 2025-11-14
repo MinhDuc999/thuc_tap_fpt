@@ -87,3 +87,13 @@ class _AnimatedStockRowState extends State<AnimatedStockRow> {
     return buildRow(widget.stock, widget.rowIndex, widget.totalRow, _flashCells);
   }
 }
+
+class CellFlashState{
+  final String stockSymbol;
+  final int cellIndex;
+  final int flashLine;
+  final Color flashColor;
+  final DateTime timestamp;
+
+  CellFlashState({required this.stockSymbol, required this.cellIndex, required this.flashLine, required this.flashColor, required this.timestamp});
+}

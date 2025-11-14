@@ -42,6 +42,9 @@ dependencies:
   fluttertoast: ^8.2.4
   dotted_border: ^2.1.0
 
+  shared_core:
+    path: ./shared_core
+
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
@@ -82,6 +85,28 @@ flutter:
     - assets/icons/ic_add.svg
     - assets/icons/ic_add_symbol.svg
     - assets/icons/ic_delete.svg
+    - assets/icons/back.svg
+    - assets/icons/bang_gia.svg
+    - assets/icons/bieu_do.svg
+    - assets/icons/cai_dat2.svg
+    - assets/icons/cai_dat.svg
+    - assets/icons/chuyen_tien.svg
+    - assets/icons/search.svg
+    - assets/icons/nhan_dinh.svg
+    - assets/icons/OTP.svg
+    - assets/icons/pt_ky_thuat.svg
+    - assets/icons/so_lenh.svg
+    - assets/icons/tai_khoan.svg
+    - assets/icons/tai_san.svg
+    - assets/icons/thong_bao.svg
+    - assets/icons/tin_tuc.svg
+    - assets/icons/trang_chu.svg
+    - assets/icons/ung_dung.svg
+    - assets/icons/thi_truong.svg
+    - assets/icons/loi.svg
+    - assets/icons/dat_lenh.svg
+    - assets/icons/default.svg
+    - assets/icons/huy.svg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
