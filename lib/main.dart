@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shared_core/core/injection.dart' as lt;
 import 'package:ui_bang_gia/core/injection.dart' as di;
-import 'package:ui_bang_gia/presentations/adjust_page.dart';
-import 'package:ui_bang_gia/presentations/market_page.dart';
-import 'package:shared_core/shared_core.dart';
+import 'package:ui_bang_gia/presentations/adjust_page/adjust_page.dart';
+import 'package:shared_core/shared_core.dart' as lt;
+
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await di.init();
   await lt.init();
-  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 

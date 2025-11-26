@@ -1,110 +1,73 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ui_bang_gia/bloc/stock/stock_event.dart';
 import 'package:ui_bang_gia/bloc/stock/stock_state.dart';
+import 'package:ui_bang_gia/constants/market_filter.dart';
 import 'package:ui_bang_gia/core/injection.dart';
-import 'package:ui_bang_gia/domain/usecase/market/filter_market_by_category_usecase.dart';
-import 'package:ui_bang_gia/domain/usecase/market/get_display_stocks_usecase.dart';
-import 'package:ui_bang_gia/domain/usecase/market/load_market_usecase.dart';
-import 'package:ui_bang_gia/domain/usecase/market/sort_market_usecase.dart';
+import 'package:ui_bang_gia/domain/repository/stockRepository.dart';
+import 'package:ui_bang_gia/domain/usecase/market/filter_market_data_usecase.dart';
+import 'package:ui_bang_gia/domain/usecase/market/load_market_data_usecase.dart';
+import 'package:ui_bang_gia/domain/usecase/market/sort_market_data_usecase.dart';
 
 class MarketBloc extends Bloc<MarketEvent, MarketState> {
-  final LoadMarketUseCase _loadMarket = getIt<LoadMarketUseCase>();
-  final SortMarketUseCase _sortMarket = getIt<SortMarketUseCase>();
-  final FilterMarketByCategoryUseCase _filterMarketByCategoryUseCase = getIt<FilterMarketByCategoryUseCase>();
-  final GetDisplayStocksUseCase _getDisplayStocksUseCase = getIt<GetDisplayStocksUseCase>();
-  MarketBloc() : super(MarketState(
-      stocks: [],
-      sortedColumn: null,
-      ascending: true,
-      allStocks: [],
-      isLoading: true,
-  )) {
+  final LoadMarketDataUseCase _loadMarketDataUseCase = getIt<LoadMarketDataUseCase>();
+  final SortMarketDataUseCase _sortMarketDataUseCase = getIt<SortMarketDataUseCase>();
+  final FilterMarketDataUseCase _filterMarketDataUseCase = getIt<FilterMarketDataUseCase>();
+
+  MarketBloc() : super(_loadInitialState()) {
     on<MarketEventLoadMarket>(_onLoadMarket);
-    on<MarketEventLoadFirst>(_onLoadMarketFirst);
     on<MarketEventSort>(_onSort);
     on<MarketEventFilterByCategory>(_onFilterByCategory);
+
+    add(MarketEventLoadMarket());
   }
 
+  static MarketState _loadInitialState() {
+    final repository = getIt<MarketRepository>();
+    final savedMarketState = repository.loadMarketState();
 
-  void _onLoadMarket(
-      MarketEventLoadMarket event,
-      Emitter<MarketState> emit,
-      ) {
-    final allStocks = _loadMarket();
+    String? selectedCategory;
+    Map<String, List<String>> filterMap = {};
 
-    final displayStocks = _getDisplayStocksUseCase(
-      allStocks: allStocks,
-      selectedCategory: state.selectedCategory,
-      filterMap: state.filterMap,
-    );
+    if (savedMarketState != null) {
+      selectedCategory = savedMarketState['selectedCategory'] as String?;
+      filterMap = savedMarketState['filterMap'] as Map<String, List<String>>? ?? {};
 
+    } else {
+      selectedCategory = 'HOSE';
+      filterMap = Map<String, List<String>>.from(MarketFilter.DEFAULT_FILTER_MAP);
+    }
 
-    emit(state.copyWith(
-      stocks: displayStocks,
-      allStocks: allStocks,
+    return MarketState(
+      stocks: [],
+      allStocks: [],
       sortedColumn: null,
       ascending: true,
-      isLoading: false,
-    ));
-  }
-
-  void _onLoadMarketFirst(
-      MarketEventLoadFirst event,
-      Emitter<MarketState> emit,
-      ) {
-    final allStocks = _loadMarket();
-
-    final defaultFilterMap = event.filterMap ?? {};
-
-
-    final displayStocks = _getDisplayStocksUseCase(
-      allStocks: allStocks,
-      selectedCategory: 'HOSE',
-      filterMap: defaultFilterMap,
+      isLoading: true,
+      selectedCategory: selectedCategory,
+      filterMap: filterMap,
     );
-
-    emit(state.copyWith(
-      stocks: displayStocks,
-      allStocks: allStocks,
-      sortedColumn: null,
-      ascending: true,
-      isLoading: false,
-      selectedCategory: 'HOSE',
-      filterMap: defaultFilterMap,
-    ));
   }
 
+
+  Future<void> _onLoadMarket(MarketEventLoadMarket event, Emitter<MarketState> emit) async {
+    final newState = await _loadMarketDataUseCase.execute(state);
+    emit(newState);
+  }
 
   void _onSort(MarketEventSort event, Emitter<MarketState> emit) {
-    final newList = _sortMarket(
-      stocks: state.stocks,
+    emit(_sortMarketDataUseCase.execute(
+      state: state,
       column: event.column,
-      ascending: event.ascending,
-    );
-
-    emit(state.copyWith(
-      stocks: newList,
-      sortedColumn: event.column,
       ascending: event.ascending,
     ));
   }
 
-  void _onFilterByCategory(
-      MarketEventFilterByCategory event,
-      Emitter<MarketState> emit,
-      ) {
-    final filteredStocks = _filterMarketByCategoryUseCase(
-      allStocks: state.allStocks,
+  Future<void> _onFilterByCategory(MarketEventFilterByCategory event, Emitter<MarketState> emit) async {
+    final newState = await _filterMarketDataUseCase.execute(
+      state: state,
       category: event.category,
       filterMap: event.filterMap,
     );
-
-    emit(state.copyWith(
-      stocks: filteredStocks,
-      selectedCategory: event.category,
-      filterMap: event.filterMap,
-      sortedColumn: null,
-      ascending: true,
-    ));
+    emit(newState);
   }
 }

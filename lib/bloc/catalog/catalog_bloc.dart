@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ui_bang_gia/bloc/catalog/catalog_event.dart';
 import 'package:ui_bang_gia/bloc/catalog/catalog_state.dart';
 import 'package:ui_bang_gia/core/injection.dart';
+import 'package:ui_bang_gia/domain/repository/catalogRepository.dart';
 import 'package:ui_bang_gia/domain/usecase/catalog/add_stock_to_catalog_usecase.dart';
 import 'package:ui_bang_gia/domain/usecase/catalog/clear_catalog_usecase.dart';
 import 'package:ui_bang_gia/domain/usecase/catalog/delete_stock_from_catalog_usecase.dart';
@@ -29,7 +30,7 @@ class CatalogBloc extends Bloc<CatalogEvent, CatalogState> {
   final TextEditingController addCatalog = TextEditingController();
   final TextEditingController updateCatalog = TextEditingController();
 
-  CatalogBloc() : super(CatalogState()) {
+  CatalogBloc() : super(_loadInitialState()) {
     on<ToggleCatalogEvent>(_onToggleCatalog);
     on<CloseCatalogEvent>(_onCloseCatalog);
     on<SelectCatalogEvent>(_onSelectCatalog);
@@ -40,6 +41,22 @@ class CatalogBloc extends Bloc<CatalogEvent, CatalogState> {
     on<ClearCatalogSelectionEvent>(_onClearCatalogSelection);
     on<AddStockToCatalogEvent>(_onAddStockToCatalog);
     on<DeleteStockFromCatalogEvent>(_onDeleteStockFromCatalog);
+  }
+
+  static CatalogState _loadInitialState() {
+    final repository = getIt<CatalogRepository>();
+    final savedState = repository.loadCatalogState();
+
+    if (savedState != null) {
+      return CatalogState(
+        isCatalogOpen: false,
+        selectedCatalog: savedState['selectedCatalog'],
+        allCatalog: savedState['allCatalog'],
+        filterCatalog: savedState['filterCatalog'],
+      );
+    }
+
+    return CatalogState();
   }
 
   void _onToggleCatalog(ToggleCatalogEvent event, Emitter<CatalogState> emit) {
@@ -71,6 +88,7 @@ class CatalogBloc extends Bloc<CatalogEvent, CatalogState> {
     if (newName.isEmpty) return;
     emit(_renameCatalogUseCase.execute(state, event.oldName, event.newName));
     updateCatalog.clear();
+
   }
 
   void _onDeleteCatalog(DeleteCatalogEvent event, Emitter<CatalogState> emit) {

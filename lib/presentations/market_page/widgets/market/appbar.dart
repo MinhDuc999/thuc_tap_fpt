@@ -14,9 +14,9 @@ import 'package:ui_bang_gia/bloc/market/market_menu_state.dart';
 import 'package:ui_bang_gia/bloc/stock/stock_bloc.dart';
 import 'package:ui_bang_gia/bloc/stock/stock_event.dart';
 import 'package:ui_bang_gia/bloc/stock/stock_state.dart';
-import 'package:ui_bang_gia/widgets/catalog/catalogBottomSheet.dart';
-import 'package:ui_bang_gia/widgets/catalog/filterBottomSheet.dart';
-import 'package:ui_bang_gia/widgets/market/market_dropdown.dart';
+import 'package:ui_bang_gia/presentations/market_page/widgets/catalog/catalogBottomSheet.dart';
+import 'package:ui_bang_gia/presentations/market_page/widgets/catalog/filterBottomSheet.dart';
+import 'package:ui_bang_gia/presentations/market_page/widgets/market/market_dropdown.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Map<String, dynamic>> allMarket;
@@ -322,17 +322,22 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                                   IconButton(
                                     onPressed: () {
                                       Navigator.of(context).pop();
-                                    },
+                                      },
                                     icon: SvgPicture.asset("assets/icons/back.svg"),
                                   ),
-                                  Text(
-                                    'Bảng giá',
-                                    style: GoogleFonts.manrope(
-                                      fontSize: 13.sp,
-                                      fontWeight: FontWeight.w500,
-                                      height: 1.5,
-                                      letterSpacing: 0,
-                                      color: Color(0xFF747A81),
+                                  GestureDetector(
+                                    onTap: (){
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Text(
+                                      'Bảng giá',
+                                      style: GoogleFonts.manrope(
+                                        fontSize: 13.sp,
+                                        fontWeight: FontWeight.w500,
+                                        height: 1.5,
+                                        letterSpacing: 0,
+                                        color: Color(0xFF747A81),
+                                      ),
                                     ),
                                   ),
                                   AnimatedOpacity(
@@ -476,10 +481,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                                           ],
                                         ):
                                       Text(
-                                        (
-                                        (state.selectedCategory == null)
-                                            ? ""
-                                            : ((state.isMenuOpen == true || catalogState.isCatalogOpen == true)) ? "" :' - ${state.selectedCategory}'),
+                                        ((state.selectedCategory == null) ? "" : ((state.isMenuOpen == true || catalogState.isCatalogOpen == true)) ? "" :' - ${state.selectedCategory}'),
                                         style: GoogleFonts.manrope(
                                           fontSize: 14.sp,
                                           fontWeight: FontWeight.w500,

@@ -6,13 +6,17 @@ class GetDisplayStocksUseCase {
     String? selectedCategory,
     Map<String, List<String>>? filterMap,
   }) {
-    if (selectedCategory == null || filterMap == null) {
+    if (selectedCategory == null) {
+      return allStocks;
+    }
+
+    if (filterMap == null || filterMap.isEmpty) {
       return [];
     }
 
-    final filterSymbols = filterMap[selectedCategory] ?? [];
+    final filterSymbols = filterMap[selectedCategory];
 
-    if (filterSymbols.isEmpty) {
+    if (filterSymbols == null || filterSymbols.isEmpty) {
       return [];
     }
 

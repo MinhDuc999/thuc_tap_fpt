@@ -13,7 +13,7 @@ import 'package:ui_bang_gia/bloc/stock/stock_event.dart';
 import 'package:ui_bang_gia/bloc/stock/stock_state.dart';
 import 'package:ui_bang_gia/helper/utils.dart';
 import 'package:ui_bang_gia/models/stock/stock_model.dart';
-import 'package:ui_bang_gia/widgets/market/animatedStockRow.dart';
+import 'package:ui_bang_gia/presentations/market_page/widgets/market/animatedStockRow.dart';
 
 Widget buildRow(Stock s, int rowIndex, int totalRows, Map<int, CellFlashState> flashCells) {
   return BlocBuilder<FilterCellBloc, FilterCellState>(
@@ -152,7 +152,7 @@ Widget buildSellColor(String value, Stock stock, Color? bgColor, int originalInd
               parts[0].trim(),
               style: GoogleFonts.manrope(
                 fontFeatures: [FontFeature.tabularFigures()],
-                fontSize: 13.sp,
+                fontSize: 12.sp,
                 fontWeight: FontWeight.w500,
                 height: 1.2,
                 letterSpacing: 0,
@@ -166,7 +166,7 @@ Widget buildSellColor(String value, Stock stock, Color? bgColor, int originalInd
               parts[1].trim(),
               style: GoogleFonts.manrope(
                 fontFeatures: [FontFeature.tabularFigures()],
-                fontSize: 13.sp,
+                fontSize: 12.sp,
                 fontWeight: FontWeight.w500,
                 height: 1.2,
                 letterSpacing: 0,
@@ -182,7 +182,7 @@ Widget buildSellColor(String value, Stock stock, Color? bgColor, int originalInd
       value,
       style: GoogleFonts.manrope(
         fontFeatures: [FontFeature.tabularFigures()],
-        fontSize: 13.sp,
+        fontSize: 12.sp,
         fontWeight: FontWeight.w700,
         height: 1.2,
         letterSpacing: 0,
@@ -212,24 +212,26 @@ Widget buildSellColor(String value, Stock stock, Color? bgColor, int originalInd
             parts[0].trim(),
             style: GoogleFonts.manrope(
               fontFeatures: [FontFeature.tabularFigures()],
-              fontSize: 13.sp,
+              fontSize: 12.sp,
               fontWeight: FontWeight.w500,
               height: 1.2,
               letterSpacing: 0,
               color: textColor,
             ),
+            maxLines: 1,
             textAlign: originalIndex == 0 ? TextAlign.start : TextAlign.end,
           ),
         ) : Text(
           parts[0].trim(),
           style: GoogleFonts.manrope(
             fontFeatures: [FontFeature.tabularFigures()],
-            fontSize: 13.sp,
+            fontSize: 12.sp,
             fontWeight: FontWeight.w500,
             height: 1.2,
             letterSpacing: 0,
             color: textColor,
           ),
+          maxLines: 1,
           textAlign: originalIndex == 0 ? TextAlign.start : TextAlign.end,
         ),
         (parts[1].trim().isNotEmpty) ?
@@ -244,24 +246,26 @@ Widget buildSellColor(String value, Stock stock, Color? bgColor, int originalInd
             parts[1].trim(),
             style: GoogleFonts.manrope(
               fontFeatures: [FontFeature.tabularFigures()],
-              fontSize: 13.sp,
+              fontSize: 12.sp,
               fontWeight: FontWeight.w500,
               height: 1.2,
               letterSpacing: 0,
               color: textColor,
             ),
+            maxLines: 1,
             textAlign: originalIndex == 0 ? TextAlign.start : TextAlign.end,
           ),
         ) : Text(
           parts[1].trim(),
           style: GoogleFonts.manrope(
             fontFeatures: [FontFeature.tabularFigures()],
-            fontSize: 13.sp,
+            fontSize: 12.sp,
             fontWeight: FontWeight.w500,
             height: 1.2,
             letterSpacing: 0,
             color: textColor,
           ),
+          maxLines: 1,
           textAlign: originalIndex == 0 ? TextAlign.start : TextAlign.end,
         ),
       ],
@@ -278,7 +282,7 @@ Widget buildSellColor(String value, Stock stock, Color? bgColor, int originalInd
       value,
       style: GoogleFonts.manrope(
         fontFeatures: [FontFeature.tabularFigures()],
-        fontSize: 13.sp,
+        fontSize: 12.sp,
         fontWeight: FontWeight.w500,
         height: 1.2,
         letterSpacing: 0,
@@ -336,7 +340,7 @@ Widget buildFixedBodyColumn(MarketState state, int totalRows, CatalogState catal
               child: Text(
                 'Xem chi tiết',
                 style: GoogleFonts.manrope(
-                  fontSize: 13.sp,
+                  fontSize: 12.sp,
                   fontWeight: FontWeight.w500,
                   color: Color(0xFFEFEFEF),
                 ),
@@ -369,7 +373,7 @@ Widget buildFixedBodyColumn(MarketState state, int totalRows, CatalogState catal
                  child: Text(
                    'Xoá khỏi danh mục',
                    style: GoogleFonts.manrope(
-                     fontSize: 13.sp,
+                     fontSize: 12.sp,
                      fontWeight: FontWeight.w500,
                      color: Color(0xFFEFEFEF),
                    ),
@@ -388,7 +392,7 @@ Widget buildFixedBodyColumn(MarketState state, int totalRows, CatalogState catal
               child: Text(
                 'Mua',
                 style: GoogleFonts.manrope(
-                  fontSize: 13.sp,
+                  fontSize: 12.sp,
                   fontWeight: FontWeight.w500,
                   color: Color(0xFFEFEFEF),
                 ),
@@ -407,7 +411,7 @@ Widget buildFixedBodyColumn(MarketState state, int totalRows, CatalogState catal
               child: Text(
                 'Bán',
                 style: GoogleFonts.manrope(
-                  fontSize: 13.sp,
+                  fontSize: 12.sp,
                   fontWeight: FontWeight.w500,
                   color: Color(0xFFEFEFEF),
                 ),
@@ -442,7 +446,7 @@ Widget buildFixedBodyColumn(MarketState state, int totalRows, CatalogState catal
                       : s.symbol,
                   style: GoogleFonts.manrope(
                     fontFeatures: [FontFeature.tabularFigures()],
-                    fontSize: 13.sp,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w700,
                     height: 1.3,
                     letterSpacing: 0,

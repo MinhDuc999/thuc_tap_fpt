@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_core/presentations/navigationbar_page.dart';
-import 'package:ui_bang_gia/presentations/market_page.dart';
+import 'package:ui_bang_gia/presentations/market_page/market_page.dart';
 
 
 class AdjustPage extends StatefulWidget {

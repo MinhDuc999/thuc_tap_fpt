@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ui_bang_gia/bloc/filterCell/filterCell_event.dart';
 import 'package:ui_bang_gia/bloc/filterCell/filterCell_state.dart';
 import 'package:ui_bang_gia/bloc/filterCell/filter_bloc.dart';
-import 'package:ui_bang_gia/widgets/market/buildFilterButton.dart';
+import 'package:ui_bang_gia/presentations/market_page/widgets/market/buildFilterButton.dart';
 
 void showFilterBottomSheet(BuildContext context){
   final filterBloc = context.read<FilterCellBloc>();

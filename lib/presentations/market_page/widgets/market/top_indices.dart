@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ui_bang_gia/helper/utils.dart';
-import 'package:ui_bang_gia/widgets/market/animatedTopIndices.dart';
+import 'package:ui_bang_gia/presentations/market_page/widgets/market/animatedTopIndices.dart';
 
 
 Widget buildTopIndices(List<Map<String, String>> indices,Map<String, IndexFlashState> flashStates) {
   return SizedBox(
-    height: 57,
+    height: 59,
     child: ListView.separated(
       //padding: EdgeInsets.symmetric(horizontal: 7.w),
       scrollDirection: Axis.horizontal,

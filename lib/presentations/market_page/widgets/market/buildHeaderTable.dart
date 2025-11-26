@@ -60,7 +60,7 @@ Widget cellHeader(String text, BuildContext context, MarketState state, int orig
         Text(
           text,
           style: GoogleFonts.manrope(
-            fontSize: 13.sp,
+            fontSize: 12.sp,
             fontWeight: FontWeight.w500,
             height: 1.3,
             letterSpacing: 0,
@@ -130,7 +130,7 @@ Widget cellHeader(String text, BuildContext context, MarketState state, int orig
           Text(
             text,
             style: GoogleFonts.manrope(
-              fontSize: 13.sp,
+              fontSize: 12.sp,
               fontWeight: FontWeight.w500,
               height: 1.3,
               letterSpacing: 0,
@@ -184,7 +184,7 @@ Widget cellHeader(String text, BuildContext context, MarketState state, int orig
           Text(
             text,
             style: GoogleFonts.manrope(
-              fontSize: 13.sp,
+              fontSize: 12.sp,
               fontWeight: FontWeight.w500,
               height: 1.3,
               letterSpacing: 0,
@@ -223,7 +223,7 @@ Widget cellHeader(String text, BuildContext context, MarketState state, int orig
     ) : Text(
       text,
       style: GoogleFonts.manrope(
-        fontSize: 13.sp,
+        fontSize: 12.sp,
         fontWeight: FontWeight.w500,
         height: 1.3,
         letterSpacing: 0,
@@ -266,7 +266,7 @@ Widget buildFixedHeaderColumn(BuildContext context, MarketState state) {
           Text(
             'Mã',
             style: GoogleFonts.manrope(
-              fontSize: 13.sp,
+              fontSize: 12.sp,
               fontWeight: FontWeight.w500,
               height: 1.3,
               letterSpacing: 0,

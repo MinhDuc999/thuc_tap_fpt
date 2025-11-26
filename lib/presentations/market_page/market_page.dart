@@ -3,19 +3,18 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:ui_bang_gia/bloc/catalog/catalog_bloc.dart';
-import 'package:ui_bang_gia/bloc/catalog/catalog_event.dart';
 import 'package:ui_bang_gia/bloc/catalog/catalog_state.dart';
 import 'package:ui_bang_gia/bloc/filterCell/filterCell_state.dart';
 import 'package:ui_bang_gia/bloc/filterCell/filter_bloc.dart';
 import 'package:ui_bang_gia/bloc/market/market_menu_bloc.dart';
 import 'package:ui_bang_gia/bloc/stock/stock_bloc.dart';
-import 'package:ui_bang_gia/bloc/stock/stock_event.dart';
 import 'package:ui_bang_gia/bloc/stock/stock_state.dart';
-import 'package:ui_bang_gia/widgets/market/animatedStockRow.dart';
-import 'package:ui_bang_gia/widgets/market/animatedTopIndices.dart';
-import 'package:ui_bang_gia/widgets/market/appbar.dart';
-import 'package:ui_bang_gia/widgets/market/buildHeaderTable.dart';
-import 'package:ui_bang_gia/widgets/market/table.dart';
+import 'package:ui_bang_gia/constants/market_filter.dart';
+import 'package:ui_bang_gia/presentations/market_page/widgets/market/animatedStockRow.dart';
+import 'package:ui_bang_gia/presentations/market_page/widgets/market/animatedTopIndices.dart';
+import 'package:ui_bang_gia/presentations/market_page/widgets/market/appbar.dart';
+import 'package:ui_bang_gia/presentations/market_page/widgets/market/buildHeaderTable.dart';
+import 'package:ui_bang_gia/presentations/market_page/widgets/market/table.dart';
 
 class MarketPage extends StatefulWidget {
   const MarketPage({super.key});
@@ -90,7 +89,7 @@ class _MarketPageState extends State<MarketPage> {
 
   @override
   Widget build(BuildContext context) {
-
+    final filterMarket = MarketFilter.DEFAULT_FILTER_MAP;
     final List<Map<String,dynamic>> allMarket =[
       {
         "name": "ETF",
@@ -121,46 +120,13 @@ class _MarketPageState extends State<MarketPage> {
         "sub": ["Bảo hiểm", "Cơ sở hạ tầng giao thông vận tải", "Công nghệ thông tin tích hợp","Công ty chứng khoán"],
       },
     ];
-    final List<String> allCatalog = [
-      "Thủy sản",
-      "Thép",
-      "Dầu khí",
-      "Khoáng sản",
-      "Nông sản",
-      "Chăn nuôi",
-      "Trồng trọt",
-      "Đánh bắt"
-    ];
-
-    final Map<String, List<String>> filterMarket = {
-      "ETF": ["SHB","AAH"],
-      "Phái sinh":["CVHM24011","FUEVFVNDD", "E1VFVN300"],
-      "VN30": ["FUEVFVNDD"],
-      "VN100": ["E1VFVN300"],
-      "GB05": [],
-      "GB10": [],
-      "CW": ["VIC", "HPG","SHB","AAH", "AVI", "A32"],
-      "UPCOM": ["MCH"],
-      "HNX": ["HVN","VND","VNM","VCB"],
-      "HNX30": ["PVS", "SHB"],
-      "BOND": [],
-      "HOSE":["HPG","MCH","HVN","SHB", "BVH","AAH","VIC", "AVI", "A32","VNM", "VCB", "MSN", "ACB","VND","PVS", "VJC"],
-      "VNXALL": ["VNM", "SHB", "ABC", "HPG", "VJC", "FPT", "CMG","VND"],
-      "VNALL": ["VNM", "VCB", "VIC", "HPG", "MSN", "FPT", "SSI", "VND", "BVH"],
-      "VNMID": ["ABB", "ADG", "ABC", "ABT"],
-      "VMSML": ["AAS", "AAH", "AVI", "A32"],
-      "Bảo hiểm": ["BVH", "BMI"],
-      "Cơ sở hạ tầng giao thông vận tải": ["VJC", "HVN"],
-      "Công nghệ thông tin tích hợp": ["FPT", "CMG"],
-      "Công ty chứng khoán": ["SSI", "VND"],
-    };
 
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => MarketBloc()..add(MarketEventLoadFirst(filterMap: filterMarket,)),),
+        BlocProvider(create: (_) => MarketBloc()),
         BlocProvider(create: (_) => MarketMenuBloc()),
         BlocProvider(create: (_) => FilterCellBloc()),
-        BlocProvider(create: (_) => CatalogBloc()..add(LoadCatalogEvent(allCatalog)))
+        BlocProvider(create: (_) => CatalogBloc())
       ],
       child: Scaffold(
         backgroundColor: Color(0xFF111315),

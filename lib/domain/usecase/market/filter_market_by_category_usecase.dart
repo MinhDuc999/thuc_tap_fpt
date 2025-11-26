@@ -6,9 +6,9 @@ class FilterMarketByCategoryUseCase {
     required String category,
     required Map<String, List<String>> filterMap,
   }) {
-    final filterSymbols = filterMap[category] ?? [];
+    final filterSymbols = filterMap[category];
 
-    if (filterSymbols.isEmpty) {
+    if (filterSymbols == null || filterSymbols.isEmpty) {
       return [];
     }
 

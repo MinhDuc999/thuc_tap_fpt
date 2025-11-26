@@ -10,12 +10,6 @@ class MarketEventLoadMarket extends MarketEvent {
   List<Object?> get props => [];
 }
 
-class MarketEventLoadFirst extends MarketEvent {
-  final Map<String, List<String>>? filterMap;
-  const MarketEventLoadFirst({this.filterMap});
-  @override
-  List<Object?> get props => [filterMap];
-}
 
 class MarketEventSort extends MarketEvent {
   final MarketSortColumn column;

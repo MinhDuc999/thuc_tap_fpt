@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:ui_bang_gia/helper/utils.dart';
 import 'package:ui_bang_gia/models/stock/stock_model.dart';
-import 'package:ui_bang_gia/widgets/market/table.dart';
+import 'package:ui_bang_gia/presentations/market_page/widgets/market/table.dart';
 
 class AnimatedStockRow extends StatefulWidget {
   final Stock stock;
