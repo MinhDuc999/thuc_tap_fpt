@@ -66,3 +66,7 @@ class ChangeButton extends NavigationEvent{
   @override
   List<Object?> get props => [index];
 }
+class InitializeNavigationEvent extends NavigationEvent {
+  @override
+  List<Object?> get props => [];
+}

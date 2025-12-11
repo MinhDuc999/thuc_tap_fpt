@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_core/constants/feature_data.dart';
 
-Widget buildFeatureItem(BuildContext context, String feature, String iconPath) {
+Widget buildFeatureItem(BuildContext context, String featureKey) {
+  final feature = NavigationData.getFeatureByKey(featureKey);
+  if (feature == null) return SizedBox.shrink();
+
   return SizedBox(
     width: 70.w,
     child: Draggable<String>(
-      data: feature,
+      data: featureKey,
       feedback: Transform.translate(
         offset: Offset(-20, 0),
         child: Material(
@@ -26,7 +30,7 @@ Widget buildFeatureItem(BuildContext context, String feature, String iconPath) {
                   ],
                 ),
                 child: SvgPicture.asset(
-                  iconPath,
+                  feature.iconPath,
                   height: 23.h,
                 ),
               ),
@@ -46,14 +50,14 @@ Widget buildFeatureItem(BuildContext context, String feature, String iconPath) {
               ),
               child: Center(
                 child: SvgPicture.asset(
-                  iconPath,
+                  feature.iconPath,
                   height: 23.h,
                 ),
               ),
             ),
             SizedBox(height: 8.h),
             Text(
-              feature,
+              feature.displayName,
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -77,14 +81,14 @@ Widget buildFeatureItem(BuildContext context, String feature, String iconPath) {
             ),
             child: Center(
               child: SvgPicture.asset(
-                iconPath,
+                feature.iconPath,
                 height: 23.h,
               ),
             ),
           ),
           SizedBox(height: 8.h),
           Text(
-            feature,
+            feature.displayName,
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,

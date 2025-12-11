@@ -33,3 +33,8 @@ class SelectSubMenuItemEvent extends MarketMenuEvent {
   @override
   List<Object?> get props => [subItem];
 }
+
+class InitializeMarketMenuEvent extends MarketMenuEvent {
+  @override
+  List<Object?> get props => [];
+}

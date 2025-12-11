@@ -90,36 +90,7 @@ class _MarketPageState extends State<MarketPage> {
   @override
   Widget build(BuildContext context) {
     final filterMarket = MarketFilter.DEFAULT_FILTER_MAP;
-    final List<Map<String,dynamic>> allMarket =[
-      {
-        "name": "ETF",
-        "sub": [],
-      },
-      {
-        "name": "Phái sinh",
-        "sub": ["Phái sinh","VN30","VN100","GB05","GB10"],
-      },
-      {
-        "name": "CW",
-        "sub": [],
-      },
-      {
-        "name": "UPCOM",
-        "sub": [],
-      },
-      {
-        "name": "HNX",
-        "sub": [ "HNX","HNX30", "BOND"],
-      },
-      {
-        "name": "HOSE",
-        "sub": [ "HOSE","VN30","VN100","VNXALL","VNALL","VNMID","VMSML"],
-      },
-      {
-        "name": "Ngành",
-        "sub": ["Bảo hiểm", "Cơ sở hạ tầng giao thông vận tải", "Công nghệ thông tin tích hợp","Công ty chứng khoán"],
-      },
-    ];
+    final allMarket = AllMarket.DEFAULT_MARKET;
 
     return MultiBlocProvider(
       providers: [
