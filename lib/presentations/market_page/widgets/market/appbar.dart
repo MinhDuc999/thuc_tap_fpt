@@ -14,12 +14,13 @@ import 'package:ui_bang_gia/bloc/market/market_menu_state.dart';
 import 'package:ui_bang_gia/bloc/stock/stock_bloc.dart';
 import 'package:ui_bang_gia/bloc/stock/stock_event.dart';
 import 'package:ui_bang_gia/bloc/stock/stock_state.dart';
+import 'package:ui_bang_gia/models/stock/market_category_model.dart';
 import 'package:ui_bang_gia/presentations/market_page/widgets/catalog/catalogBottomSheet.dart';
 import 'package:ui_bang_gia/presentations/market_page/widgets/catalog/filterBottomSheet.dart';
 import 'package:ui_bang_gia/presentations/market_page/widgets/market/market_dropdown.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final List<Map<String, dynamic>> allMarket;
+  final List<MarketCategory> allMarket;
   final Map<String, List<String>> filterMarket;
   final List<String> allCatalog;
 
@@ -58,17 +59,17 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                                     scrollDirection: Axis.horizontal,
                                     child: Row(
                                       children: allMarket.map((market) {
-                                        final hasSubmenu = (market['sub'] as List).isNotEmpty;
-                                        final isSelected = state.selectedCategory == market['name'];
-                                        final subItems = List<String>.from(market['sub'] as List);
-                                        final selectedSub = state.selectedSubItems[market['name']];
+                                        final hasSubmenu = market.sub.isNotEmpty;
+                                        final isSelected = state.selectedCategory == market.name;
+                                        final subItems = market.sub;
+                                        final selectedSub = state.selectedSubItems[market.name];
                                         return buildMenuButton(
                                             context,
-                                            market['name'],
+                                            market.name,
                                             hasSubmenu,
                                             isSelected,
                                                 () {
-                                              context.read<MarketMenuBloc>().add(SelectMarketCategoryEvent(market['name'], hasSubmenu),);
+                                              context.read<MarketMenuBloc>().add(SelectMarketCategoryEvent(market.name, hasSubmenu),);
                                             },
                                             subItems,
                                             selectedSub,

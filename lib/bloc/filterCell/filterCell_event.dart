@@ -20,3 +20,7 @@ class SetKhoiLuongEvent extends FilterCellEvent {
   @override
   List<Object?> get props => [khoiLuong];
 }
+class InitializeFilterCellEvent extends FilterCellEvent {
+  @override
+  List<Object?> get props => [];
+}

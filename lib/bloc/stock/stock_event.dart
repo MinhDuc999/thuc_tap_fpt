@@ -29,6 +29,10 @@ class MarketEventFilterByCategory extends MarketEvent {
   List<Object?> get props => [category,filterMap];
 }
 
+class InitializeMarketEvent extends MarketEvent {
+  @override
+  List<Object?> get props => [];
+}
 
 
 

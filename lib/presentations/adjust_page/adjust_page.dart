@@ -13,8 +13,6 @@ class AdjustPage extends StatefulWidget {
   State<AdjustPage> createState() => _AdjustPageState();
 }
 
-
-
 class _AdjustPageState extends State<AdjustPage> {
 
   @override
@@ -22,8 +20,6 @@ class _AdjustPageState extends State<AdjustPage> {
     _screen();
     super.initState();
   }
-
-
 
   void _screen() async {
     await SystemChrome.setPreferredOrientations([

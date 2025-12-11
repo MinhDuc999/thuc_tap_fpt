@@ -3,24 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ui_bang_gia/bloc/catalog/catalog_event.dart';
 import 'package:ui_bang_gia/bloc/catalog/catalog_state.dart';
 import 'package:ui_bang_gia/core/injection.dart';
-import 'package:ui_bang_gia/domain/repository/catalogRepository.dart';
-import 'package:ui_bang_gia/domain/usecase/catalog/add_stock_to_catalog_usecase.dart';
-import 'package:ui_bang_gia/domain/usecase/catalog/clear_catalog_usecase.dart';
-import 'package:ui_bang_gia/domain/usecase/catalog/delete_stock_from_catalog_usecase.dart';
-import 'package:ui_bang_gia/domain/usecase/catalog/load_catalog_use_case.dart';
-import 'package:ui_bang_gia/domain/usecase/catalog/toggle_catalog_usecase.dart';
-import 'package:ui_bang_gia/domain/usecase/catalog/close_catalog_usecase.dart';
-import 'package:ui_bang_gia/domain/usecase/catalog/select_catalog_usecase.dart';
-import 'package:ui_bang_gia/domain/usecase/catalog/add_catalog_usecase.dart';
-import 'package:ui_bang_gia/domain/usecase/catalog/rename_catalog_usecase.dart';
-import 'package:ui_bang_gia/domain/usecase/catalog/delete_catalog_usecase.dart';
+import 'package:ui_bang_gia/domain/repository/price_board_repository.dart';
+import 'package:ui_bang_gia/domain/usecase/catalog/catalog_usecase.dart';
 
 class CatalogBloc extends Bloc<CatalogEvent, CatalogState> {
   final ToggleCatalogUseCase _toggleCatalogUseCase = getIt<ToggleCatalogUseCase>();
   final CloseCatalogUseCase _closeCatalogUseCase = getIt<CloseCatalogUseCase>();
   final ClearCatalogUseCase _clearCatalogUseCase = getIt<ClearCatalogUseCase>();
   final SelectCatalogUseCase _selectCatalogUseCase = getIt<SelectCatalogUseCase>();
-  final LoadCatalogUseCase _loadCatalogUseCase = getIt<LoadCatalogUseCase>();
   final AddCatalogUseCase _addCatalogUseCase = getIt<AddCatalogUseCase>();
   final RenameCatalogUseCase _renameCatalogUseCase = getIt<RenameCatalogUseCase>();
   final DeleteCatalogUseCase _deleteCatalogUseCase = getIt<DeleteCatalogUseCase>();
@@ -30,85 +20,113 @@ class CatalogBloc extends Bloc<CatalogEvent, CatalogState> {
   final TextEditingController addCatalog = TextEditingController();
   final TextEditingController updateCatalog = TextEditingController();
 
-  CatalogBloc() : super(_loadInitialState()) {
+  CatalogBloc() : super(CatalogState()) {
     on<ToggleCatalogEvent>(_onToggleCatalog);
     on<CloseCatalogEvent>(_onCloseCatalog);
     on<SelectCatalogEvent>(_onSelectCatalog);
-    on<LoadCatalogEvent>(_onLoadCatalog);
     on<AddCatalogEvent>(_onAddCatalog);
     on<RenameCatalogEvent>(_onRenameCatalog);
     on<DeleteCatalogEvent>(_onDeleteCatalog);
     on<ClearCatalogSelectionEvent>(_onClearCatalogSelection);
     on<AddStockToCatalogEvent>(_onAddStockToCatalog);
     on<DeleteStockFromCatalogEvent>(_onDeleteStockFromCatalog);
+    on<InitializeCatalogEvent>(_onInitialize);
+
+    add(InitializeCatalogEvent());
   }
 
-  static CatalogState _loadInitialState() {
+  Future<void> _onInitialize(InitializeCatalogEvent event, Emitter<CatalogState> emit) async {
     final repository = getIt<CatalogRepository>();
-    final savedState = repository.loadCatalogState();
+    final savedState = await repository.loadCatalogState();
 
     if (savedState != null) {
-      return CatalogState(
+      emit(CatalogState(
         isCatalogOpen: false,
         selectedCatalog: savedState['selectedCatalog'],
         allCatalog: savedState['allCatalog'],
         filterCatalog: savedState['filterCatalog'],
-      );
+      ));
     }
-
-    return CatalogState();
   }
 
   void _onToggleCatalog(ToggleCatalogEvent event, Emitter<CatalogState> emit) {
-    emit(_toggleCatalogUseCase.execute(state));
+    final newState = _toggleCatalogUseCase.execute(state.isCatalogOpen);
+    emit(state.copyWith(isCatalogOpen: newState));
   }
 
   void _onCloseCatalog(CloseCatalogEvent event, Emitter<CatalogState> emit) {
-    emit(_closeCatalogUseCase.execute(state));
+    final newState = _closeCatalogUseCase.execute();
+    emit(state.copyWith(isCatalogOpen: newState));
   }
 
-  void _onClearCatalogSelection(ClearCatalogSelectionEvent event, Emitter<CatalogState> emit) {
-    emit(_clearCatalogUseCase.execute(state));
+  Future<void> _onClearCatalogSelection(ClearCatalogSelectionEvent event, Emitter<CatalogState> emit) async {
+    await _clearCatalogUseCase.execute();
+    emit(state.copyWith(clearSelectedCatalog: true));
   }
 
-  void _onSelectCatalog(SelectCatalogEvent event, Emitter<CatalogState> emit) {
-    emit(_selectCatalogUseCase.execute(state, event.category));
+  Future<void> _onSelectCatalog(SelectCatalogEvent event, Emitter<CatalogState> emit,) async {
+    final newCategory = await _selectCatalogUseCase.execute(event.category);
+    emit(state.copyWith(selectedCatalog: newCategory));
   }
 
-  void _onLoadCatalog(LoadCatalogEvent event, Emitter<CatalogState> emit) {
-    emit(_loadCatalogUseCase.execute(state, event.catalogs));
-  }
-
-  void _onAddCatalog(AddCatalogEvent event, Emitter<CatalogState> emit) {
-    emit(_addCatalogUseCase.execute(state, event.name));
-  }
-
-  void _onRenameCatalog(RenameCatalogEvent event, Emitter<CatalogState> emit) {
-    final newName = updateCatalog.text.trim();
-    if (newName.isEmpty) return;
-    emit(_renameCatalogUseCase.execute(state, event.oldName, event.newName));
-    updateCatalog.clear();
-
-  }
-
-  void _onDeleteCatalog(DeleteCatalogEvent event, Emitter<CatalogState> emit) {
-    emit(_deleteCatalogUseCase.execute(state, event.name));
-  }
-
-  void _onAddStockToCatalog(AddStockToCatalogEvent event, Emitter<CatalogState> emit) {
-    final previousState = state;
-    final newState = _addStockToCatalogUseCase.execute(state, event.catalogName, event.stockSymbol);
-    if (newState != previousState) {
-      emit(newState);
+  Future<void> _onAddCatalog(AddCatalogEvent event, Emitter<CatalogState> emit) async {
+    final result = await _addCatalogUseCase.execute(state.selectedCatalog,state.allCatalog, event.name);
+    if (result != null) {
+      emit(state.copyWith(allCatalog: result));
     }
   }
 
-  void _onDeleteStockFromCatalog(DeleteStockFromCatalogEvent event, Emitter<CatalogState> emit){
-    emit(_deleteStockFromCatalogEvent.execute(state,event.catalogName, event.stockSymbol));
+  Future<void> _onRenameCatalog(RenameCatalogEvent event, Emitter<CatalogState> emit) async {
+    final newName = updateCatalog.text.trim();
+    if (newName.isEmpty) return;
+
+    final params = RenameCatalogParams(
+      currentCatalogs: state.allCatalog,
+      currentSelected: state.selectedCatalog,
+      currentFilterCatalog: state.filterCatalog,
+      oldName: event.oldName,
+      newName: event.newName,
+    );
+
+    final result = await _renameCatalogUseCase.execute(params);
+
+    if (result != null) {
+      emit(state.copyWith(
+        allCatalog: result['catalogs'],
+        selectedCatalog: result['selectedCatalog'],
+        filterCatalog: result['filterCatalog'],
+      ));
+    }
+    updateCatalog.clear();
   }
 
+  Future<void> _onDeleteCatalog(DeleteCatalogEvent event, Emitter<CatalogState> emit) async {
+    final newCatalogs = await _deleteCatalogUseCase.execute(state.selectedCatalog,state.allCatalog, event.name);
+    emit(state.copyWith(allCatalog: newCatalogs));
+  }
 
-  void addCatalogRequest(){
+  Future<void> _onAddStockToCatalog(AddStockToCatalogEvent event, Emitter<CatalogState> emit) async {
+    final result = await _addStockToCatalogUseCase.execute(
+      state.filterCatalog,
+      event.catalogName,
+      event.stockSymbol,
+    );
+
+    if (result != null) {
+      emit(state.copyWith(filterCatalog: result));
+    }
+  }
+
+  Future<void> _onDeleteStockFromCatalog(DeleteStockFromCatalogEvent event, Emitter<CatalogState> emit) async {
+    final newFilterCatalog = await _deleteStockFromCatalogEvent.execute(
+      state.filterCatalog,
+      event.catalogName,
+      event.stockSymbol,
+    );
+    emit(state.copyWith(filterCatalog: newFilterCatalog));
+  }
+
+  void addCatalogRequest() {
     final name = addCatalog.text.trim();
     add(AddCatalogEvent(name));
     addCatalog.clear();
@@ -117,6 +135,7 @@ class CatalogBloc extends Bloc<CatalogEvent, CatalogState> {
   @override
   Future<void> close() {
     addCatalog.dispose();
+    updateCatalog.dispose();
     return super.close();
   }
 }

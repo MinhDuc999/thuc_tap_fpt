@@ -11,6 +11,10 @@ class CloseCatalogEvent extends CatalogEvent {
   @override
   List<Object?> get props => [];
 }
+class InitializeCatalogEvent extends CatalogEvent {
+  @override
+  List<Object?> get props => [];
+}
 
 class ClearCatalogSelectionEvent extends CatalogEvent {
   @override
@@ -23,14 +27,6 @@ class SelectCatalogEvent extends CatalogEvent {
 
   @override
   List<Object?> get props => [category];
-}
-
-class LoadCatalogEvent extends CatalogEvent {
-  final List<String> catalogs;
-  LoadCatalogEvent(this.catalogs);
-
-  @override
-  List<Object?> get props => [catalogs];
 }
 
 class AddCatalogEvent extends CatalogEvent {

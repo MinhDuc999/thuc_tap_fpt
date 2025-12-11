@@ -1,10 +1,9 @@
-abstract class NavigationRepository{
-  Future<void> saveState({
-    required List<String?> selectedSlots,
-    required List<String?> selected,
-    required int selectedIndex,
-    required int selectedTab,
+abstract class NavigationRepository {
+  Future<void> saveNavigationState({
+    List<String?>? selectedSlots,
+    int? selectedIndex,
   });
-  Map<String,dynamic>? loadState();
-  Future<void> clearState();
+
+  Future<Map<String, dynamic>?> loadNavigationState();
+  Future<void> clearNavigationState();
 }

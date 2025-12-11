@@ -1,39 +1,68 @@
 import 'dart:convert';
 import 'package:shared_core/core/injection.dart';
+import 'package:shared_core/data/database/database_helper.dart';
 import 'package:shared_core/domain/repositories/navi_repository.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-class NavigationRepositoryImpl implements NavigationRepository{
-  static const String _keySelectedSlots = 'selected_slots';
-  static const String _keySelected = 'selected';
-  static const String _keySelectedIndex = 'selected_index';
-  static const String _keySelectedTab = 'selected_tab';
-
-  final _prefs = getIt<SharedPreferences>();
+class NavigationRepositoryImpl implements NavigationRepository {
+  //final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+  final _dbHelper = getIt<DatabaseHelper>();
 
   @override
-  Future<void> clearState() async{
-    await _prefs.remove(_keySelectedSlots);
-    await _prefs.remove(_keySelected);
-    await _prefs.remove(_keySelectedIndex);
-    await _prefs.remove(_keySelectedTab);
+  Future<void> saveNavigationState({
+    List<String?>? selectedSlots,
+    int? selectedIndex,
+  }) async {
+    final db = await _dbHelper.database;
+
+    final existing = await db.query(
+      'navigation_state',
+      where: 'id = ?',
+      whereArgs: [1],
+    );
+
+    if (existing.isEmpty) {
+      await db.insert('navigation_state', {
+        'id': 1,
+        'selected_slots': jsonEncode(selectedSlots ?? ["Trang chủ", "Sổ lệnh", "Đặt lệnh", "Tài sản", "Ứng dụng"]),
+        'selected_index': selectedIndex ?? 0,
+      });
+    } else {
+      final Map<String, dynamic> updateData = {};
+
+      if (selectedSlots != null) {
+        updateData['selected_slots'] = jsonEncode(selectedSlots);
+      }
+      if (selectedIndex != null) {
+        updateData['selected_index'] = selectedIndex;
+      }
+
+      if (updateData.isNotEmpty) {
+        await db.update(
+          'navigation_state',
+          updateData,
+          where: 'id = ?',
+          whereArgs: [1],
+        );
+      }
+    }
   }
 
   @override
-  Map<String, dynamic>? loadState() {
+  Future<Map<String, dynamic>?> loadNavigationState() async {
     try {
-      final slotsJson = _prefs.getString(_keySelectedSlots);
-      final selectedJson = _prefs.getString(_keySelected);
-      final selectedIndex = _prefs.getInt(_keySelectedIndex);
-      final selectedTab = _prefs.getInt(_keySelectedTab);
+      final db = await _dbHelper.database;
+      final List<Map<String, dynamic>> maps = await db.query(
+        'navigation_state',
+        where: 'id = ?',
+        whereArgs: [1],
+      );
 
-      if (slotsJson == null) return null;
+      if (maps.isEmpty) return null;
 
+      final data = maps.first;
       return {
-        'selectedSlots': List<String?>.from(jsonDecode(slotsJson)),
-        'selected': List<String?>.from(jsonDecode(selectedJson ?? '[]')),
-        'selectedIndex': selectedIndex ?? 0,
-        'selectedTab': selectedTab ?? 0,
+        'selectedSlots': List<String?>.from(jsonDecode(data['selected_slots'])),
+        'selectedIndex': data['selected_index'] as int,
       };
     } catch (e) {
       return null;
@@ -41,11 +70,8 @@ class NavigationRepositoryImpl implements NavigationRepository{
   }
 
   @override
-  Future<void> saveState({required List<String?> selectedSlots, required List<String?> selected, required int selectedIndex, required int selectedTab}) async{
-    await _prefs.setString(_keySelectedSlots, jsonEncode(selectedSlots));
-    await _prefs.setString(_keySelected, jsonEncode(selected));
-    await _prefs.setInt(_keySelectedIndex, selectedIndex);
-    await _prefs.setInt(_keySelectedTab, selectedTab);
+  Future<void> clearNavigationState() async {
+    final db = await _dbHelper.database;
+    await db.delete('navigation_state');
   }
-  
 }

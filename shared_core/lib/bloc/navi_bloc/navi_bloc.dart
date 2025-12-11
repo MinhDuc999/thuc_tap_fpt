@@ -4,19 +4,12 @@ import 'package:shared_core/bloc/navi_bloc/navi_event.dart';
 import 'package:shared_core/bloc/navi_bloc/navi_state.dart';
 import 'package:shared_core/core/injection.dart';
 import 'package:shared_core/domain/repositories/navi_repository.dart';
-import 'package:shared_core/domain/usecase/feature/all_feature_usecase.dart';
-import 'package:shared_core/domain/usecase/feature/close_search_view_usecase.dart';
-import 'package:shared_core/domain/usecase/feature/open_search_view_usecase.dart';
-import 'package:shared_core/domain/usecase/feature/remove_feature_usecase.dart';
-import 'package:shared_core/domain/usecase/feature/replace_feature_usecase.dart';
-import 'package:shared_core/domain/usecase/feature/search_feature_usecase.dart';
-import 'package:shared_core/domain/usecase/tab/change_button_usecase.dart';
-import 'package:shared_core/domain/usecase/tab/change_tab_usecase.dart';
+import 'package:shared_core/domain/usecase/feature/feature_usecase.dart';
 
-
-class NavigationBloc extends Bloc<NavigationEvent, NavigationState>{
+class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   final TextEditingController searchController = TextEditingController();
   final FocusNode searchFocusNode = FocusNode();
+
   final AllFeatureUseCase _allFeatureUseCase = getIt<AllFeatureUseCase>();
   final RemoveFeatureUseCase _removeFeatureUseCase = getIt<RemoveFeatureUseCase>();
   final ReplaceFeatureUseCase _replaceFeatureUseCase = getIt<ReplaceFeatureUseCase>();
@@ -25,7 +18,13 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState>{
   final CloseSearchViewUseCase _closeSearchViewUseCase = getIt<CloseSearchViewUseCase>();
   final ChangeTabUseCase _changeTabUseCase = getIt<ChangeTabUseCase>();
   final ChangeButtonUseCase _changeButtonUseCase = getIt<ChangeButtonUseCase>();
-  NavigationBloc():super(_loadInitState()){
+
+  NavigationBloc() : super(NavigationState(
+    selectedSlots: ["home", "order_book", "place_order", "assets", "apps"],
+    selected: ["Mặc định", null, null, null, null],
+    selectedIndex: 0,
+    selectedTab: 0,
+  )) {
     on<AllFeature>(_onAllFeature);
     on<RemoveFeature>(_onRemoveFeature);
     on<ReplaceFeature>(_onReplaceFeature);
@@ -34,59 +33,119 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState>{
     on<CloseSearchView>(_onCloseSearchView);
     on<ChangeTab>(_onChangeTab);
     on<ChangeButton>(_onChangeButton);
+    on<InitializeNavigationEvent>(_onInitialize);
+
+    add(InitializeNavigationEvent());
   }
 
-  static NavigationState _loadInitState(){
+  Future<void> _onInitialize(InitializeNavigationEvent event, Emitter<NavigationState> emit) async {
     final repository = getIt<NavigationRepository>();
-    final savedState = repository.loadState();
+    final savedState = await repository.loadNavigationState();
+
     if (savedState != null) {
-      return NavigationState(
+      emit(NavigationState(
         selectedSlots: savedState['selectedSlots'],
-        selected: savedState['selected'],
+        selected: ["Mặc định", null, null, null, null],
         selectedIndex: savedState['selectedIndex'],
         selectedTab: 0,
-      );
+      ));
     }
-
-    return NavigationState(
-      selectedSlots: ["Trang chủ", "Sổ lệnh", "Đặt lệnh", "Tài sản", "Ứng dụng"],
-      selected: ["Mặc định", null, null, null, null],
-      selectedIndex: 0,
-      selectedTab: 0,
-    );
   }
 
   Future<void> _onAllFeature(AllFeature event, Emitter<NavigationState> emit) async {
-    await _allFeatureUseCase.execute(state: state, event: event, emit: emit);
+    final result = await _allFeatureUseCase.execute(
+      AllFeatureParams(
+        feature: event.feature,
+        currentSlots: state.selectedSlots,
+        currentSearchResults: state.searchResults,
+        recentlyRemoved: state.recentlyRemovedFeature,
+      ),
+    );
+
+    if (result != null) {
+      emit(state.copyWith(
+        selectedSlots: result['updatedSlots'],
+        searchResults: result['updatedSearchResults'],
+        recentlyRemovedFeature: result['updatedRecentlyRemoved'],
+      ));
+    }
   }
 
   Future<void> _onRemoveFeature(RemoveFeature event, Emitter<NavigationState> emit) async {
-    await _removeFeatureUseCase.execute(state: state, event: event, emit: emit);
+    final result = await _removeFeatureUseCase.execute(
+      RemoveFeatureParams(
+        feature: event.feature,
+        currentSlots: state.selectedSlots,
+        currentSearchResults: state.searchResults,
+        recentlyRemoved: state.recentlyRemovedFeature,
+      ),
+    );
+
+    if (result != null) {
+      emit(state.copyWith(
+        selectedSlots: result['updatedSlots'],
+        searchResults: result['updatedSearchResults'],
+        recentlyRemovedFeature: result['updatedRecentlyRemoved'],
+      ));
+    }
   }
+
   Future<void> _onReplaceFeature(ReplaceFeature event, Emitter<NavigationState> emit) async {
-    await _replaceFeatureUseCase.execute(state: state, event: event, emit: emit);
+    final result = await _replaceFeatureUseCase.execute(
+      ReplaceFeatureParams(
+        feature: event.feature,
+        targetIndex: event.index,
+        currentSlots: state.selectedSlots,
+        currentSearchResults: state.searchResults,
+        recentlyRemoved: state.recentlyRemovedFeature,
+      ),
+    );
+
+    if (result != null) {
+      emit(state.copyWith(
+        selectedSlots: result['updatedSlots'],
+        searchResults: result['updatedSearchResults'],
+        recentlyRemovedFeature: result['updatedRecentlyRemoved'],
+      ));
+    }
   }
 
-  Future<void> _onSearchFeature(SearchFeature event, Emitter<NavigationState> emit) async{
-    await _searchFeatureUseCase.execute(state: state, event: event, emit: emit);
+  void _onSearchFeature(SearchFeature event, Emitter<NavigationState> emit) {
+    final result = _searchFeatureUseCase.execute(
+      SearchFeatureParams(
+        query: event.query,
+        allFeatures: event.allFeatures ?? [],
+        currentSlots: state.selectedSlots,
+      ),
+    );
+
+    if (result != null) {
+      emit(state.copyWith(
+        searchResults: result['results'],
+        searchQuery: result['query'],
+        recentlyRemovedFeature: result['query'].isEmpty ? null : state.recentlyRemovedFeature,
+      ));
+    }
   }
 
-  void _onOpenSearchView(OpenSearchView event, Emitter<NavigationState> emit){
-    final newState = _openSearchViewUseCase.execute(state);
-    emit(newState);
+  void _onOpenSearchView(OpenSearchView event, Emitter<NavigationState> emit) {
+    final isOpen = _openSearchViewUseCase.execute(state.isSearchViewOpen);
+    emit(state.copyWith(isSearchViewOpen: isOpen));
   }
 
-  void _onCloseSearchView(CloseSearchView event, Emitter<NavigationState > emit) {
-    final newState = _closeSearchViewUseCase.execute(state, focusNode: searchFocusNode);
-    emit(newState);
+  void _onCloseSearchView(CloseSearchView event, Emitter<NavigationState> emit) {
+    _closeSearchViewUseCase.execute(searchFocusNode);
+    emit(state.copyWith(isSearchViewOpen: false));
   }
 
   Future<void> _onChangeTab(ChangeTab event, Emitter<NavigationState> emit) async {
-    await _changeTabUseCase.execute(state: state, event: event, emit: emit);
+    await _changeTabUseCase.execute(event.index);
+    emit(state.copyWith(selectedTab: event.index));
   }
 
   Future<void> _onChangeButton(ChangeButton event, Emitter<NavigationState> emit) async {
-    await _changeButtonUseCase.execute(state: state, event: event, emit: emit);
+    await _changeButtonUseCase.execute(event.index);
+    emit(state.copyWith(selectedIndex: event.index));
   }
 
   @override

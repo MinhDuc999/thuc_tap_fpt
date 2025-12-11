@@ -1,8 +1,3 @@
-import 'package:json_annotation/json_annotation.dart';
-
-part 'stock_model.g.dart';
-
-@JsonSerializable()
 class Stock {
   final String symbol;
   final double? tc;
@@ -42,10 +37,6 @@ class Stock {
     required this.ban,
   });
 
-
-  factory Stock.fromJson(Map<String,dynamic> json) => _$StockFromJson(json);
-
-  Map<String,dynamic> toJson() => _$StockToJson(this);
 
   Stock copyWith({
     String? symbol,

@@ -2,44 +2,52 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ui_bang_gia/bloc/filterCell/filterCell_event.dart';
 import 'package:ui_bang_gia/bloc/filterCell/filterCell_state.dart';
 import 'package:ui_bang_gia/core/injection.dart';
-import 'package:ui_bang_gia/domain/repository/filterCellRepository.dart';
-import 'package:ui_bang_gia/domain/usecase/filterCell/moCua_usecase.dart';
-import 'package:ui_bang_gia/domain/usecase/filterCell/muaBan3_usecase.dart';
-import 'package:ui_bang_gia/domain/usecase/filterCell/nnMuaBan_usecase.dart';
-import 'package:ui_bang_gia/domain/usecase/filterCell/set_khoi_luong_usecase.dart';
+import 'package:ui_bang_gia/domain/repository/price_board_repository.dart';
+import 'package:ui_bang_gia/domain/usecase/filterCell/filter_cell_usecase.dart';
 
-class FilterCellBloc extends Bloc<FilterCellEvent,FilterCellState>{
+class FilterCellBloc extends Bloc<FilterCellEvent, FilterCellState> {
   final MoCuaUseCase _moCuaUseCase = getIt<MoCuaUseCase>();
   final NNMuaBanUseCase _nnMuaBanUseCase = getIt<NNMuaBanUseCase>();
   final MuaBan3UseCase _muaBan3UseCase = getIt<MuaBan3UseCase>();
   final SetKhoiLuongUseCase _setKhoiLuongUseCase = getIt<SetKhoiLuongUseCase>();
-  FilterCellBloc() : super(_loadInitialState()){
-    on<ToggleNNMuaBanEvent>((event,emit){
-      emit(_nnMuaBanUseCase.execute(state));
+
+  FilterCellBloc() : super(FilterCellState()) {
+    on<ToggleNNMuaBanEvent>((event, emit) {
+      final newValue = _nnMuaBanUseCase.execute(state.showNNMuaBan);
+      emit(state.copyWith(showNNMuaBan: newValue));
     });
-    on<ToggleMoCuaEvent>((event,emit){
-      emit(_moCuaUseCase.execute(state));
+
+    on<ToggleMoCuaEvent>((event, emit) {
+      final newValue = _moCuaUseCase.execute(state.showMoCua);
+      emit(state.copyWith(showMoCua: newValue));
     });
-    on<ToggleGiaMuaBan3Event>((event,emit){
-      emit(_muaBan3UseCase.execute(state));
+
+    on<ToggleGiaMuaBan3Event>((event, emit) {
+      final newValue = _muaBan3UseCase.execute(state.showGiaMuaBan3);
+      emit(state.copyWith(showGiaMuaBan3: newValue));
     });
-    on<SetKhoiLuongEvent>((event,emit){
-      emit(_setKhoiLuongUseCase.execute(state, event.khoiLuong));
+
+    on<SetKhoiLuongEvent>((event, emit) {
+      final newValue = _setKhoiLuongUseCase.execute(event.khoiLuong);
+      emit(state.copyWith(khoiLuong: newValue));
     });
+
+    on<InitializeFilterCellEvent>(_onInitialize);
+
+    add(InitializeFilterCellEvent());
   }
 
-  static FilterCellState _loadInitialState() {
+  Future<void> _onInitialize(InitializeFilterCellEvent event, Emitter<FilterCellState> emit) async {
     final repository = getIt<FilterCellRepository>();
-    final savedState = repository.loadFilterCellState();
+    final savedState = await repository.loadFilterCellState();
 
     if (savedState != null) {
-      return FilterCellState(
+      emit(FilterCellState(
         showNNMuaBan: savedState['showNNMuaBan'],
         showMoCua: savedState['showMoCua'],
         showGiaMuaBan3: savedState['showGiaMuaBan3'],
         khoiLuong: savedState['khoiLuong'],
-      );
+      ));
     }
-    return FilterCellState();
   }
 }
