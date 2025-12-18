@@ -31,12 +31,11 @@ class ReplaceFeature extends NavigationEvent{
 
 class SearchFeature extends NavigationEvent {
   final String query;
-  final List<String>? allFeatures;
 
-  SearchFeature(this.query, {this.allFeatures});
+  SearchFeature(this.query, );
 
   @override
-  List<Object?> get props => [query, allFeatures];
+  List<Object?> get props => [query];
 }
 
 class OpenSearchView extends NavigationEvent{

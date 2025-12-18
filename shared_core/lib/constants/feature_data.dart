@@ -1,7 +1,7 @@
 import 'package:shared_core/models/feature_model.dart';
 import 'package:shared_core/models/tab_model.dart';
 
-abstract class NavigationData {
+class NavigationData {
   static const List<FeatureModel> allFeatures = [
     FeatureModel(
       id: 1,

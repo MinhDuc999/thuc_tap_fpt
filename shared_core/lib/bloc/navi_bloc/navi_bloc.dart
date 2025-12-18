@@ -53,20 +53,18 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   }
 
   Future<void> _onAllFeature(AllFeature event, Emitter<NavigationState> emit) async {
-    final result = await _allFeatureUseCase.execute(
+    final updatedSlots = await _allFeatureUseCase.execute(
       AllFeatureParams(
         feature: event.feature,
         currentSlots: state.selectedSlots,
-        currentSearchResults: state.searchResults,
-        recentlyRemoved: state.recentlyRemovedFeature,
       ),
     );
 
-    if (result != null) {
+    if (updatedSlots != null) {
+      // UI tự xử lý việc filter searchResults và recentlyRemoved
       emit(state.copyWith(
-        selectedSlots: result['updatedSlots'],
-        searchResults: result['updatedSearchResults'],
-        recentlyRemovedFeature: result['updatedRecentlyRemoved'],
+        selectedSlots: updatedSlots,
+        // Không cần pass searchResults và recentlyRemoved vào UseCase nữa
       ));
     }
   }
@@ -114,18 +112,15 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     final result = _searchFeatureUseCase.execute(
       SearchFeatureParams(
         query: event.query,
-        allFeatures: event.allFeatures ?? [],
         currentSlots: state.selectedSlots,
       ),
     );
 
-    if (result != null) {
-      emit(state.copyWith(
-        searchResults: result['results'],
-        searchQuery: result['query'],
-        recentlyRemovedFeature: result['query'].isEmpty ? null : state.recentlyRemovedFeature,
-      ));
-    }
+    emit(state.copyWith(
+      searchResults: result,
+      searchQuery: event.query,
+      recentlyRemovedFeature: event.query.isEmpty ? null : state.recentlyRemovedFeature,
+    ));
   }
 
   void _onOpenSearchView(OpenSearchView event, Emitter<NavigationState> emit) {

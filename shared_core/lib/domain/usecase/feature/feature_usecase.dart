@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_core/constants/feature_data.dart';
 import 'package:shared_core/core/injection.dart';
 import 'package:shared_core/domain/repositories/navi_repository.dart';
+import 'package:shared_core/models/feature_model.dart';
 
 //Mở
 class OpenSearchViewUseCase {
@@ -21,53 +22,32 @@ class CloseSearchViewUseCase {
 class AllFeatureParams {
   final String feature;
   final List<String?> currentSlots;
-  final List<String>? currentSearchResults;
-  final List<String>? recentlyRemoved;
 
   AllFeatureParams({
     required this.feature,
     required this.currentSlots,
-    this.currentSearchResults,
-    this.recentlyRemoved,
   });
 }
-
 class AllFeatureUseCase {
   final _repository = getIt<NavigationRepository>();
 
-  Future<Map<String, dynamic>?> execute(AllFeatureParams params) async {
+  Future<List<String?>?> execute(AllFeatureParams params) async {
     final feature = NavigationData.getFeatureByKey(params.feature);
-    if (feature == null) return null;
-    if (feature.isFixed) return null;
+    if (feature == null || feature.isFixed) return null;
+
     final updatedSlots = List<String?>.from(params.currentSlots);
 
     final emptyIndex = updatedSlots.indexWhere((slot) => slot == null);
 
     if (emptyIndex == -1) return null;
 
-    updatedSlots[emptyIndex] = params.feature;
-
-    List<String>? updatedSearchResults = params.currentSearchResults;
-    if (updatedSearchResults != null) {
-      updatedSearchResults = List<String>.from(updatedSearchResults);
-      updatedSearchResults.remove(params.feature);
-    }
-
-    List<String>? updatedRecentlyRemoved = params.recentlyRemoved;
-    if (updatedRecentlyRemoved != null) {
-      updatedRecentlyRemoved = List<String>.from(updatedRecentlyRemoved);
-      updatedRecentlyRemoved.remove(params.feature);
-    }
+    updatedSlots[emptyIndex] = feature.key;
 
     if (updatedSlots.where((e) => e != null).length >= 5) {
       await _repository.saveNavigationState(selectedSlots: updatedSlots);
     }
 
-    return {
-      'updatedSlots': updatedSlots,
-      'updatedSearchResults': updatedSearchResults,
-      'updatedRecentlyRemoved': updatedRecentlyRemoved,
-    };
+    return updatedSlots;
   }
 }
 
@@ -75,7 +55,7 @@ class AllFeatureUseCase {
 class RemoveFeatureParams {
   final String feature;
   final List<String?> currentSlots;
-  final List<String>? currentSearchResults;
+  final List<FeatureModel>? currentSearchResults;
   final List<String>? recentlyRemoved;
 
   RemoveFeatureParams({
@@ -91,33 +71,28 @@ class RemoveFeatureUseCase {
 
   Future<Map<String, dynamic>?> execute(RemoveFeatureParams params) async {
     final feature = NavigationData.getFeatureByKey(params.feature);
-    if (feature == null) return null;
-
-    if (feature.isFixed) return null;
+    if (feature == null || feature.isFixed) return null;
 
     final updatedSlots = List<String?>.from(params.currentSlots);
 
-    final index = updatedSlots.indexOf(params.feature);
+    final index = updatedSlots.indexOf(feature.key);
     if (index == -1) return null;
 
     updatedSlots[index] = null;
 
-    List<String>? updatedSearchResults = params.currentSearchResults;
-    if (updatedSearchResults != null) {
-      updatedSearchResults = List<String>.from(updatedSearchResults);
-      updatedSearchResults.remove(params.feature);
-      updatedSearchResults.insert(0, params.feature);
-    }
+    List<FeatureModel>? updatedSearchResults = params.currentSearchResults != null
+        ? List<FeatureModel>.from(params.currentSearchResults!)
+        : [];
+
+    updatedSearchResults.removeWhere((f) => f.key == feature.key);
+    updatedSearchResults.insert(0, feature);
 
     List<String> updatedRecentlyRemoved = params.recentlyRemoved != null
-        ? List<String>.from(params.recentlyRemoved!) : [];
+        ? List<String>.from(params.recentlyRemoved!)
+        : [];
 
-    updatedRecentlyRemoved.remove(params.feature);
-    updatedRecentlyRemoved.insert(0, params.feature);
-
-    if (updatedRecentlyRemoved.length > 10) {
-      updatedRecentlyRemoved = updatedRecentlyRemoved.sublist(0, 10);
-    }
+    updatedRecentlyRemoved.remove(feature.key);
+    updatedRecentlyRemoved.insert(0, feature.key);
 
     if (updatedSlots.where((e) => e != null).length >= 5) {
       await _repository.saveNavigationState(selectedSlots: updatedSlots);
@@ -136,7 +111,7 @@ class ReplaceFeatureParams {
   final String feature;
   final int targetIndex;
   final List<String?> currentSlots;
-  final List<String>? currentSearchResults;
+  final List<FeatureModel>? currentSearchResults;
   final List<String>? recentlyRemoved;
 
   ReplaceFeatureParams({
@@ -153,69 +128,58 @@ class ReplaceFeatureUseCase {
 
   Future<Map<String, dynamic>?> execute(ReplaceFeatureParams params) async {
     final newFeature = NavigationData.getFeatureByKey(params.feature);
-    if (newFeature == null) return null;
+    if (newFeature == null || newFeature.isFixed) return null;
 
-    if (newFeature.isFixed) return null;
+    final slots = List<String?>.from(params.currentSlots);
+    final targetKey = slots[params.targetIndex];
 
-    final updatedSlots = List<String?>.from(params.currentSlots);
-
-    final currentFeatureKey = updatedSlots[params.targetIndex];
-    if (currentFeatureKey != null) {
-      final currentFeature = NavigationData.getFeatureByKey(currentFeatureKey);
-      if (currentFeature?.isFixed == true) return null;
+    if (targetKey != null && NavigationData.getFeatureByKey(targetKey)?.isFixed == true) {
+      return null;
     }
 
-    final existingIndex = updatedSlots.indexOf(params.feature);
+    final existingIndex = slots.indexOf(params.feature);
 
+    // Swap nếu feature đã tồn tại
     if (existingIndex != -1 && existingIndex != params.targetIndex) {
-      final temp = updatedSlots[params.targetIndex];
-      updatedSlots[params.targetIndex] = params.feature;
-      updatedSlots[existingIndex] = temp;
-    } else {
-      final replacedFeatureKey = updatedSlots[params.targetIndex];
-      updatedSlots[params.targetIndex] = params.feature;
+      slots[existingIndex] = targetKey;
+      slots[params.targetIndex] = params.feature;
 
-      List<String>? updatedSearchResults = params.currentSearchResults;
-      if (updatedSearchResults != null) {
-        updatedSearchResults = List<String>.from(updatedSearchResults);
-        updatedSearchResults.remove(params.feature);
-
-        if (replacedFeatureKey != null &&
-            !updatedSearchResults.contains(replacedFeatureKey)) {
-          updatedSearchResults.insert(0, replacedFeatureKey);
-        }
-      }
-
-      List<String>? updatedRecentlyRemoved = params.recentlyRemoved;
-      if (replacedFeatureKey != null) {
-        updatedRecentlyRemoved = List<String>.from(params.recentlyRemoved ?? []);
-        updatedRecentlyRemoved.remove(replacedFeatureKey);
-        updatedRecentlyRemoved.insert(0, replacedFeatureKey);
-
-        if (updatedRecentlyRemoved.length > 10) {
-          updatedRecentlyRemoved = updatedRecentlyRemoved.sublist(0, 10);
-        }
-      }
-
-      if (updatedSlots.where((e) => e != null).length >= 5) {
-        await _repository.saveNavigationState(selectedSlots: updatedSlots);
+      if (slots.where((e) => e != null).length >= 5) {
+        await _repository.saveNavigationState(selectedSlots: slots);
       }
 
       return {
-        'updatedSlots': updatedSlots,
-        'updatedSearchResults': updatedSearchResults,
-        'updatedRecentlyRemoved': updatedRecentlyRemoved,
+        'updatedSlots': slots,
+        'updatedSearchResults': params.currentSearchResults ?? [],
+        'updatedRecentlyRemoved': params.recentlyRemoved,
       };
     }
 
-    if (updatedSlots.where((e) => e != null).length >= 5) {
-      await _repository.saveNavigationState(selectedSlots: updatedSlots);
+    // Replace và update search/recently
+    slots[params.targetIndex] = params.feature;
+
+    final searchResults = List<FeatureModel>.from(params.currentSearchResults ?? [])
+      ..removeWhere((f) => f.key == params.feature);
+
+    if (targetKey != null) {
+      final replaced = NavigationData.getFeatureByKey(targetKey);
+      if (replaced != null) searchResults.insert(0, replaced);
+    }
+
+    final recentlyRemoved = List<String>.from(params.recentlyRemoved ?? []);
+    if (targetKey != null) {
+      recentlyRemoved.remove(targetKey);
+      recentlyRemoved.insert(0, targetKey);
+    }
+
+    if (slots.where((e) => e != null).length >= 5) {
+      await _repository.saveNavigationState(selectedSlots: slots);
     }
 
     return {
-      'updatedSlots': updatedSlots,
-      'updatedSearchResults': params.currentSearchResults ?? [],
-      'updatedRecentlyRemoved': params.recentlyRemoved,
+      'updatedSlots': slots,
+      'updatedSearchResults': searchResults,
+      'updatedRecentlyRemoved': recentlyRemoved,
     };
   }
 }
@@ -223,25 +187,19 @@ class ReplaceFeatureUseCase {
 //Tìm kiếm feature
 class SearchFeatureParams {
   final String query;
-  final List<String> allFeatures;
   final List<String?> currentSlots;
 
   SearchFeatureParams({
     required this.query,
-    required this.allFeatures,
     required this.currentSlots,
   });
 }
-
 class SearchFeatureUseCase {
-  Map<String, dynamic>? execute(SearchFeatureParams params) {
+  List<FeatureModel> execute(SearchFeatureParams params) {
     final query = params.query.toLowerCase().trim();
 
     if (query.isEmpty) {
-      return {
-        'results': <String>[],
-        'query': '',
-      };
+      return <FeatureModel>[];
     }
 
     final results = NavigationData.allFeatures.where((feature) {
@@ -250,14 +208,9 @@ class SearchFeatureUseCase {
       }
 
       return feature.displayName.toLowerCase().startsWith(query);
-    })
-        .map((feature) => feature.key)
-        .toList();
+    }).toList();
 
-    return {
-      'results': results,
-      'query': query,
-    };
+    return results;
   }
 }
 

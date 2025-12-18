@@ -2,7 +2,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ui_bang_gia/bloc/filterCell/filterCell_event.dart';
 import 'package:ui_bang_gia/bloc/filterCell/filterCell_state.dart';
 import 'package:ui_bang_gia/core/injection.dart';
-import 'package:ui_bang_gia/domain/repository/price_board_repository.dart';
 import 'package:ui_bang_gia/domain/usecase/filterCell/filter_cell_usecase.dart';
 
 class FilterCellBloc extends Bloc<FilterCellEvent, FilterCellState> {
@@ -10,6 +9,8 @@ class FilterCellBloc extends Bloc<FilterCellEvent, FilterCellState> {
   final NNMuaBanUseCase _nnMuaBanUseCase = getIt<NNMuaBanUseCase>();
   final MuaBan3UseCase _muaBan3UseCase = getIt<MuaBan3UseCase>();
   final SetKhoiLuongUseCase _setKhoiLuongUseCase = getIt<SetKhoiLuongUseCase>();
+  final LoadFilterCellStateUseCase _loadFilterCellStateUseCase = getIt<LoadFilterCellStateUseCase>();
+
 
   FilterCellBloc() : super(FilterCellState()) {
     on<ToggleNNMuaBanEvent>((event, emit) {
@@ -38,8 +39,7 @@ class FilterCellBloc extends Bloc<FilterCellEvent, FilterCellState> {
   }
 
   Future<void> _onInitialize(InitializeFilterCellEvent event, Emitter<FilterCellState> emit) async {
-    final repository = getIt<FilterCellRepository>();
-    final savedState = await repository.loadFilterCellState();
+    final savedState = await _loadFilterCellStateUseCase.execute();
 
     if (savedState != null) {
       emit(FilterCellState(

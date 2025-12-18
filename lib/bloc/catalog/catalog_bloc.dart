@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ui_bang_gia/bloc/catalog/catalog_event.dart';
 import 'package:ui_bang_gia/bloc/catalog/catalog_state.dart';
 import 'package:ui_bang_gia/core/injection.dart';
-import 'package:ui_bang_gia/domain/repository/price_board_repository.dart';
 import 'package:ui_bang_gia/domain/usecase/catalog/catalog_usecase.dart';
 
 class CatalogBloc extends Bloc<CatalogEvent, CatalogState> {
@@ -16,6 +15,8 @@ class CatalogBloc extends Bloc<CatalogEvent, CatalogState> {
   final DeleteCatalogUseCase _deleteCatalogUseCase = getIt<DeleteCatalogUseCase>();
   final AddStockToCatalogUseCase _addStockToCatalogUseCase = getIt<AddStockToCatalogUseCase>();
   final DeleteStockFromCatalogUseCase _deleteStockFromCatalogEvent = getIt<DeleteStockFromCatalogUseCase>();
+  final LoadCatalogStateUseCase _loadCatalogStateUseCase = getIt<LoadCatalogStateUseCase>();
+
 
   final TextEditingController addCatalog = TextEditingController();
   final TextEditingController updateCatalog = TextEditingController();
@@ -36,8 +37,7 @@ class CatalogBloc extends Bloc<CatalogEvent, CatalogState> {
   }
 
   Future<void> _onInitialize(InitializeCatalogEvent event, Emitter<CatalogState> emit) async {
-    final repository = getIt<CatalogRepository>();
-    final savedState = await repository.loadCatalogState();
+    final savedState = await _loadCatalogStateUseCase.execute();
 
     if (savedState != null) {
       emit(CatalogState(
@@ -82,7 +82,6 @@ class CatalogBloc extends Bloc<CatalogEvent, CatalogState> {
 
     final params = RenameCatalogParams(
       currentCatalogs: state.allCatalog,
-      currentSelected: state.selectedCatalog,
       currentFilterCatalog: state.filterCatalog,
       oldName: event.oldName,
       newName: event.newName,
@@ -101,8 +100,18 @@ class CatalogBloc extends Bloc<CatalogEvent, CatalogState> {
   }
 
   Future<void> _onDeleteCatalog(DeleteCatalogEvent event, Emitter<CatalogState> emit) async {
-    final newCatalogs = await _deleteCatalogUseCase.execute(state.selectedCatalog,state.allCatalog, event.name);
-    emit(state.copyWith(allCatalog: newCatalogs));
+    final params = DeleteCatalogParams(
+        selectedCatalog: state.selectedCatalog,
+        currentCatalogs: state.allCatalog,
+        currentFilterCatalog: state.filterCatalog,
+        name: event.name
+    );
+    final newCatalogs = await _deleteCatalogUseCase.execute(params);
+    emit(state.copyWith(
+      allCatalog: newCatalogs['allCatalog'],
+      selectedCatalog: newCatalogs['selectedCatalog'],
+      filterCatalog: newCatalogs['filterCatalog'],
+    ));
   }
 
   Future<void> _onAddStockToCatalog(AddStockToCatalogEvent event, Emitter<CatalogState> emit) async {

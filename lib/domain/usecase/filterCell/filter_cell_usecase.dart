@@ -1,12 +1,19 @@
 import 'package:ui_bang_gia/core/injection.dart';
 import 'package:ui_bang_gia/domain/repository/price_board_repository.dart';
 
+class LoadFilterCellStateUseCase {
+  final _repository = getIt<FilterCellRepository>();
+
+  Future<Map<String, dynamic>?> execute() async {
+    return await _repository.loadFilterCellState();
+  }
+}
 class MoCuaUseCase {
   final _repository = getIt<FilterCellRepository>();
 
   bool execute(bool currentShowMoCua) {
     final newValue = !currentShowMoCua;
-    _repository.saveFilterCellState(showMoCua: newValue);
+    _repository.saveShowMoCua(newValue);
     return newValue;
   }
 }
@@ -16,7 +23,7 @@ class NNMuaBanUseCase {
 
   bool execute(bool currentShowNNMuaBan) {
     final newValue = !currentShowNNMuaBan;
-    _repository.saveFilterCellState(showNNMuaBan: newValue);
+    _repository.saveShowNNMuaBan(newValue);
     return newValue;
   }
 }
@@ -26,7 +33,7 @@ class MuaBan3UseCase {
 
   bool execute(bool currentShowGiaMuaBan3) {
     final newValue = !currentShowGiaMuaBan3;
-    _repository.saveFilterCellState(showGiaMuaBan3: newValue);
+    _repository.saveShowGiaMuaBan3(newValue);
     return newValue;
   }
 }
@@ -35,7 +42,7 @@ class SetKhoiLuongUseCase {
   final _repository = getIt<FilterCellRepository>();
 
   String execute(String khoiLuong) {
-    _repository.saveFilterCellState(khoiLuong: khoiLuong);
+    _repository.saveKhoiLuong(khoiLuong);
     return khoiLuong;
   }
 }

@@ -103,7 +103,11 @@ class _MarketPageState extends State<MarketPage> {
         backgroundColor: Color(0xFF111315),
         body: SafeArea(
           child: ScrollConfiguration(
-                behavior: const ScrollBehavior().copyWith(overscroll: false),
+                behavior: const ScrollBehavior().copyWith(
+                  overscroll: false,
+                  physics: const ClampingScrollPhysics(),
+                  scrollbars: false,
+                ),
                 child: NestedScrollView(
                   controller: _scrollController,
                   headerSliverBuilder: (context, innerBoxIsScrolled) => [
@@ -118,14 +122,11 @@ class _MarketPageState extends State<MarketPage> {
                           return LayoutBuilder(
                               builder: (context, constraints) {
                                 final size = MediaQuery.of(context).size;
-                                final orientation = size.width > size.height
-                                    ? Orientation.landscape
-                                    : Orientation.portrait;
-
+                                final orientation = size.width > size.height ? Orientation.landscape : Orientation.portrait;
                                 if (orientation == Orientation.portrait) {
                                   return const SizedBox.shrink();
                                 }
-                              return CustomAppBar(allMarket: allMarket,filterMarket: filterMarket,allCatalog: state.allCatalog,);
+                              return CustomAppBar(allMarket: allMarket,filterMarket: filterMarket);
                             }
                           );
                         }

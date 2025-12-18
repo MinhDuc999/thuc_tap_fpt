@@ -11,6 +11,7 @@ class CloseCatalogEvent extends CatalogEvent {
   @override
   List<Object?> get props => [];
 }
+
 class InitializeCatalogEvent extends CatalogEvent {
   @override
   List<Object?> get props => [];

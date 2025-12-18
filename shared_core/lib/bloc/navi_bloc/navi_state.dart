@@ -1,12 +1,13 @@
 import 'package:equatable/equatable.dart';
+import 'package:shared_core/models/feature_model.dart';
 
 class NavigationState extends Equatable{
   final bool isSearchViewOpen;
   final List<String?> selectedSlots;
-  final List<String?> selected;
-  final List<String>? searchResults;
+  final List<FeatureModel>? searchResults;
   final String? searchQuery;
   final List<String>? recentlyRemovedFeature;
+  final List<String?> selected;
   final int selectedIndex;
   final int selectedTab;
 
@@ -17,7 +18,7 @@ class NavigationState extends Equatable{
     bool? isSearchViewOpen,
     List<String?>? selectedSlots,
     List<String?>? selected,
-    List<String>? searchResults,
+    List<FeatureModel>? searchResults,
     String? searchQuery,
     List<String>? recentlyRemovedFeature,
     int? selectedIndex,

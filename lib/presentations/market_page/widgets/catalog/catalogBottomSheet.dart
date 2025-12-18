@@ -124,7 +124,7 @@ void showCatalogBottomSheet(BuildContext context, {bool isUpdate = false, String
                                         TextButton(
                                             onPressed: (){
                                               final newName = controller.text.trim();
-                                              if(newName.isEmpty){
+                                              if (newName.isEmpty) {
                                                 Fluttertoast.showToast(
                                                   msg: "Tên danh mục không được để trống",
                                                   toastLength: Toast.LENGTH_SHORT,
@@ -134,11 +134,10 @@ void showCatalogBottomSheet(BuildContext context, {bool isUpdate = false, String
                                                   fontSize: 14.sp,
                                                 );
                                                 focusNode.requestFocus();
-                                              }else if (isUpdate) {
-                                                if(nameUpdate != newName){
-                                                  context.read<CatalogBloc>().add(RenameCatalogEvent(nameUpdate!, newName));
-                                                  Navigator.pop(context);
-                                                }else{
+                                                return;
+                                              }
+                                              if (isUpdate) {
+                                                if (nameUpdate == newName) {
                                                   Fluttertoast.showToast(
                                                     msg: "Tên danh mục đã tồn tại",
                                                     toastLength: Toast.LENGTH_SHORT,
@@ -148,12 +147,24 @@ void showCatalogBottomSheet(BuildContext context, {bool isUpdate = false, String
                                                     fontSize: 14.sp,
                                                   );
                                                   focusNode.requestFocus();
+                                                  return;
                                                 }
+                                                if (state.allCatalog.contains(newName)) {
+                                                  Fluttertoast.showToast(
+                                                    msg: "Tên danh mục đã tồn tại",
+                                                    toastLength: Toast.LENGTH_SHORT,
+                                                    gravity: ToastGravity.TOP,
+                                                    backgroundColor: const Color(0xFFF34859),
+                                                    textColor: const Color(0xFFEFEFEF),
+                                                    fontSize: 14.sp,
+                                                  );
+                                                  focusNode.requestFocus();
+                                                  return;
+                                                }
+                                                context.read<CatalogBloc>().add(RenameCatalogEvent(nameUpdate!, newName));
+                                                Navigator.pop(context);
                                               } else {
-                                                if(!state.allCatalog.contains(newName)){
-                                                  context.read<CatalogBloc>().add(AddCatalogEvent(newName));
-                                                  Navigator.pop(context);
-                                                }else{
+                                                if (state.allCatalog.contains(newName)) {
                                                   Fluttertoast.showToast(
                                                     msg: "Danh mục đã tồn tại",
                                                     toastLength: Toast.LENGTH_SHORT,
@@ -163,7 +174,10 @@ void showCatalogBottomSheet(BuildContext context, {bool isUpdate = false, String
                                                     fontSize: 14.sp,
                                                   );
                                                   focusNode.requestFocus();
+                                                  return;
                                                 }
+                                                context.read<CatalogBloc>().add(AddCatalogEvent(newName));
+                                                Navigator.pop(context);
                                               }
                                             },
                                             child: Text(isUpdate ? "Cập nhật" : "Thêm mới",
