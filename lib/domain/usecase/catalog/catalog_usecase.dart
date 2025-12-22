@@ -35,10 +35,10 @@ class ClearCatalogUseCase {
 
 // Chọn 1 danh mục
 class SelectCatalogUseCase {
-  final _catalogRepository = getIt<CatalogRepository>();
+  final _repository = getIt<CatalogRepository>();
 
   Future<String> execute(String category) async {
-    await _catalogRepository.saveSelectedCatalog(category);
+    await _repository.saveSelectedCatalog(category);
     return category;
   }
 }
@@ -47,7 +47,7 @@ class SelectCatalogUseCase {
 class AddCatalogUseCase {
   final _repository = getIt<CatalogRepository>();
 
-  Future<List<String>?> execute(String? selectedCatalog, List<String> currentCatalogs, String name) async {
+  Future<List<String>?> execute(List<String> currentCatalogs, String name) async {
     final updatedList = List<String>.from(currentCatalogs)..add(name);
 
     await _repository.saveAllCatalog(updatedList);
@@ -91,7 +91,7 @@ class RenameCatalogUseCase {
     );
 
     return {
-      'catalogs': updatedList,
+      'allCatalog': updatedList,
       'selectedCatalog': params.newName,
       'filterCatalog': updatedFilterCatalog,
     };
@@ -100,13 +100,11 @@ class RenameCatalogUseCase {
 
 // Xóa danh mục
 class DeleteCatalogParams {
-  final String? selectedCatalog;
   final List<String> currentCatalogs;
   final Map<String, List<String>> currentFilterCatalog;
   final String name;
 
   DeleteCatalogParams({
-    required this.selectedCatalog,
     required this.currentCatalogs,
     required this.currentFilterCatalog,
     required this.name
@@ -122,14 +120,12 @@ class DeleteCatalogUseCase {
     updatedFilter.remove(params.name);
 
     await _repository.saveCatalogState(
-      selectedCatalog: params.selectedCatalog,
       allCatalog: updatedList,
       filterCatalog: updatedFilter,
     );
 
     return {
       'allCatalog': updatedList,
-      'selectedCatalog': params.selectedCatalog,
       'filterCatalog': updatedFilter,
     };
   }

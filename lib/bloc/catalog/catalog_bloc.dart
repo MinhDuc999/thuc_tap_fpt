@@ -70,7 +70,7 @@ class CatalogBloc extends Bloc<CatalogEvent, CatalogState> {
   }
 
   Future<void> _onAddCatalog(AddCatalogEvent event, Emitter<CatalogState> emit) async {
-    final result = await _addCatalogUseCase.execute(state.selectedCatalog,state.allCatalog, event.name);
+    final result = await _addCatalogUseCase.execute(state.allCatalog, event.name);
     if (result != null) {
       emit(state.copyWith(allCatalog: result));
     }
@@ -91,7 +91,7 @@ class CatalogBloc extends Bloc<CatalogEvent, CatalogState> {
 
     if (result != null) {
       emit(state.copyWith(
-        allCatalog: result['catalogs'],
+        allCatalog: result['allCatalog'],
         selectedCatalog: result['selectedCatalog'],
         filterCatalog: result['filterCatalog'],
       ));
@@ -101,7 +101,6 @@ class CatalogBloc extends Bloc<CatalogEvent, CatalogState> {
 
   Future<void> _onDeleteCatalog(DeleteCatalogEvent event, Emitter<CatalogState> emit) async {
     final params = DeleteCatalogParams(
-        selectedCatalog: state.selectedCatalog,
         currentCatalogs: state.allCatalog,
         currentFilterCatalog: state.filterCatalog,
         name: event.name
@@ -109,7 +108,6 @@ class CatalogBloc extends Bloc<CatalogEvent, CatalogState> {
     final newCatalogs = await _deleteCatalogUseCase.execute(params);
     emit(state.copyWith(
       allCatalog: newCatalogs['allCatalog'],
-      selectedCatalog: newCatalogs['selectedCatalog'],
       filterCatalog: newCatalogs['filterCatalog'],
     ));
   }
